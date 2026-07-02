@@ -1,264 +1,405 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>UKI PS Watchtower</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>UKI PS Watchtower — UK & Ireland Public Sector Intelligence</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#0d1117;color:#e6edf3;min-height:100vh}
-.topbar{background:linear-gradient(135deg,#0d2137,#0d3a6e);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid #21262d}
-.topbar h1{font-size:18px;color:#58a6ff;font-weight:700}
-.topbar .sub{font-size:12px;color:#8b949e}
-.layout{display:flex;min-height:calc(100vh - 56px)}
-.sidebar{width:200px;min-width:160px;background:#161b22;border-right:1px solid #21262d;padding:16px 10px;overflow-y:auto;max-height:calc(100vh - 56px);position:sticky;top:56px}
-.sidebar h3{font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
-.date-item{padding:8px 10px;cursor:pointer;border-radius:6px;font-size:13px;color:#8b949e;display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;transition:background 0.15s}
-.date-item:hover,.date-item.active{background:#21262d;color:#e6edf3}
-.date-item.today{color:#58a6ff;font-weight:600}
-.cnt{background:#21262d;color:#8b949e;border-radius:10px;padding:1px 7px;font-size:11px}
-.centre{flex:1;padding:20px;overflow-y:auto;max-height:calc(100vh - 56px)}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
-.chip{background:#21262d;border:1px solid #30363d;color:#8b949e;border-radius:20px;padding:5px 14px;cursor:pointer;font-size:12px;transition:all 0.15s}
-.chip:hover,.chip.active{background:#1f6feb;border-color:#388bfd;color:#e6edf3}
-.date-group{margin-bottom:28px}
-.date-label{font-size:13px;color:#58a6ff;font-weight:600;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #21262d}
-.card{background:#161b22;border:1px solid #21262d;border-radius:8px;padding:16px;margin-bottom:12px;transition:border-color 0.15s}
-.card:hover{border-color:#388bfd}
-.card .co-badge{display:inline-block;background:#21262d;color:#79c0ff;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:600;margin-bottom:8px}
-.card h3{font-size:14px;font-weight:700;color:#e6edf3;margin-bottom:6px;line-height:1.4}
-.card p{font-size:13px;color:#8b949e;line-height:1.5;margin-bottom:8px}
-.card a{color:#58a6ff;font-size:12px;text-decoration:none}
-.card a:hover{text-decoration:underline}
-.sent-chip{display:inline-block;font-size:11px;padding:2px 8px;border-radius:4px;margin-left:8px;font-weight:600}
-.right-panel{width:240px;min-width:200px;background:#161b22;border-left:1px solid #21262d;padding:16px;overflow-y:auto;max-height:calc(100vh - 56px);position:sticky;top:56px}
-.right-panel h3{font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px}
-.sent-row{margin-bottom:12px}
-.sent-co{font-size:12px;font-weight:600;color:#e6edf3;margin-bottom:4px}
-.bar-wrap{background:#21262d;border-radius:4px;height:8px;margin-bottom:3px}
-.bar{height:8px;border-radius:4px}
-.sent-info{font-size:11px;color:#8b949e}
-.no-results{color:#484f58;font-style:italic;padding:20px;text-align:center}
-.chat-btn{position:fixed;bottom:24px;right:24px;background:#1f6feb;color:#fff;border:none;border-radius:50px;padding:12px 20px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 20px rgba(31,111,235,0.4);z-index:200;display:flex;align-items:center;gap:8px}
-.chat-btn:hover{background:#388bfd}
-.chat-modal{display:none;position:fixed;bottom:80px;right:24px;width:340px;background:#161b22;border:1px solid #30363d;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.5);z-index:300;overflow:hidden}
-.chat-modal.open{display:block}
-.chat-header{background:#0d2137;padding:14px 16px;font-size:14px;font-weight:700;color:#58a6ff;display:flex;justify-content:space-between;align-items:center}
-.chat-messages{height:200px;overflow-y:auto;padding:12px;font-size:13px;color:#8b949e}
-.chat-input-row{display:flex;border-top:1px solid #21262d}
-.chat-input-row input{flex:1;background:#0d1117;border:none;color:#e6edf3;padding:10px 12px;font-size:13px;outline:none}
-.chat-input-row button{background:#1f6feb;border:none;color:#fff;padding:10px 14px;cursor:pointer;font-size:13px}
-@media(max-width:768px){.sidebar,.right-panel{display:none}.layout{display:block}}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0a0f1e; color: #e2e8f0; font-family: 'Segoe UI', system-ui, Arial, sans-serif; min-height: 100vh; }
+  
+  /* Header */
+  .header { background: linear-gradient(135deg, #0f4c81 0%, #1a7040 100%); padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; }
+  .header-title { display: flex; align-items: center; gap: 12px; }
+  .header-title h1 { font-size: 22px; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
+  .header-sub { font-size: 12px; color: #bfdbfe; margin-top: 2px; }
+  .header-date { font-size: 13px; color: #e2e8f0; text-align: right; }
+  
+  /* Layout */
+  .layout { display: grid; grid-template-columns: 200px 1fr 240px; gap: 0; min-height: calc(100vh - 70px); }
+  
+  /* Sidebar */
+  .sidebar { background: #0f172a; border-right: 1px solid #1e293b; padding: 16px 0; overflow-y: auto; max-height: calc(100vh - 70px); position: sticky; top: 70px; }
+  .sidebar-title { font-size: 10px; font-weight: 700; color: #64748b; letter-spacing: 1.5px; text-transform: uppercase; padding: 0 16px 8px; }
+  .date-item { padding: 10px 16px; cursor: pointer; font-size: 12px; color: #94a3b8; border-left: 3px solid transparent; display: flex; justify-content: space-between; align-items: center; transition: all 0.15s; }
+  .date-item:hover, .date-item.active { background: #1e293b; color: #e2e8f0; border-left-color: #3b82f6; }
+  .badge { background: #1e293b; color: #60a5fa; font-size: 10px; padding: 1px 6px; border-radius: 10px; font-weight: 600; }
+  .date-item:hover .badge, .date-item.active .badge { background: #3b82f6; color: #fff; }
+  
+  /* Main */
+  .main { padding: 20px; overflow-y: auto; }
+  .filter-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
+  .chip { background: #1e293b; color: #94a3b8; border: 1px solid #334155; border-radius: 20px; padding: 5px 12px; font-size: 11px; cursor: pointer; font-weight: 500; transition: all 0.15s; }
+  .chip:hover, .chip.active { background: #3b82f6; color: #fff; border-color: #3b82f6; }
+  
+  /* Cards */
+  .card { background: #1e293b; border-radius: 10px; padding: 16px; margin-bottom: 14px; border: 1px solid #334155; transition: all 0.15s; }
+  .card:hover { border-color: #3b82f6; box-shadow: 0 4px 20px rgba(59,130,246,0.1); }
+  .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .company-tag { background: #0f3460; color: #60a5fa; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 4px; letter-spacing: 0.5px; text-transform: uppercase; }
+  .date-tag { color: #64748b; font-size: 11px; }
+  .card-headline a { color: #f1f5f9; font-size: 14px; font-weight: 600; text-decoration: none; line-height: 1.4; }
+  .card-headline a:hover { color: #60a5fa; }
+  .card-summary { color: #94a3b8; font-size: 12px; line-height: 1.6; margin: 8px 0; }
+  .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+  .sent-positive { color: #22c55e; font-size: 12px; font-weight: 600; }
+  .sent-neutral-plus { color: #eab308; font-size: 12px; font-weight: 600; }
+  .sent-neutral { color: #94a3b8; font-size: 12px; font-weight: 600; }
+  .sent-caution { color: #f97316; font-size: 12px; font-weight: 600; }
+  .sent-negative { color: #ef4444; font-size: 12px; font-weight: 600; }
+  .read-more { color: #3b82f6; font-size: 11px; text-decoration: none; }
+  .read-more:hover { text-decoration: underline; }
+  
+  /* Right panel */
+  .right-panel { background: #0f172a; border-left: 1px solid #1e293b; padding: 16px; overflow-y: auto; max-height: calc(100vh - 70px); position: sticky; top: 70px; }
+  .panel-title { font-size: 10px; font-weight: 700; color: #64748b; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 16px; }
+  .sent-row { margin-bottom: 14px; }
+  .sent-name { font-size: 12px; font-weight: 600; color: #cbd5e1; margin-bottom: 3px; }
+  .sent-info { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #94a3b8; margin-bottom: 3px; }
+  .sent-score { font-weight: 700; color: #e2e8f0; }
+  .sent-bar-bg { background: #1e293b; border-radius: 4px; height: 6px; width: 100%; }
+  .sent-bar-fill { height: 6px; border-radius: 4px; transition: width 0.3s; }
+  .sent-count { font-size: 10px; color: #475569; margin-top: 2px; }
+  
+  /* Chat widget */
+  .chat-btn { position: fixed; bottom: 24px; right: 24px; background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: #fff; border: none; border-radius: 50px; padding: 12px 20px; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 20px rgba(59,130,246,0.4); z-index: 1000; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
+  .chat-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(59,130,246,0.5); }
+  .chat-modal { display: none; position: fixed; bottom: 80px; right: 24px; width: 320px; background: #1e293b; border: 1px solid #334155; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); z-index: 1001; }
+  .chat-modal.open { display: block; }
+  .chat-header { background: linear-gradient(135deg, #0f4c81, #1a7040); padding: 14px 16px; border-radius: 12px 12px 0 0; display: flex; justify-content: space-between; align-items: center; }
+  .chat-header h3 { font-size: 14px; color: #fff; font-weight: 600; }
+  .chat-close { background: none; border: none; color: #bfdbfe; font-size: 18px; cursor: pointer; }
+  .chat-body { padding: 16px; }
+  .chat-messages { min-height: 80px; max-height: 200px; overflow-y: auto; margin-bottom: 12px; }
+  .chat-msg { background: #0f172a; border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #94a3b8; margin-bottom: 8px; }
+  .chat-input-row { display: flex; gap: 8px; }
+  .chat-input { flex: 1; background: #0f172a; border: 1px solid #334155; border-radius: 6px; padding: 8px; color: #e2e8f0; font-size: 12px; }
+  .chat-send { background: #3b82f6; color: #fff; border: none; border-radius: 6px; padding: 8px 12px; font-size: 12px; cursor: pointer; font-weight: 600; }
+  
+  /* No results */
+  .no-results { color: #475569; font-size: 14px; padding: 40px; text-align: center; }
 </style>
 </head>
 <body>
-<div class="topbar">
-  <div>
-    <h1>📡 UKI PS Watchtower</h1>
-    <div class="sub">UK &amp; Ireland Public Sector Intelligence</div>
+
+<div class="header">
+  <div class="header-title">
+    <span style="font-size:28px;">📡</span>
+    <div>
+      <h1>UKI PS Watchtower</h1>
+      <div class="header-sub">UK &amp; Ireland Public Sector Intelligence</div>
+    </div>
   </div>
-  <div style="font-size:12px;color:#8b949e">Updated: Thu, 02 Jul 2026</div>
+  <div class="header-date">
+    <div style="font-weight:600;color:#fff;">Friday, 3 July 2026</div>
+    <div style="font-size:11px;color:#94a3b8;margin-top:2px;">5 total stories tracked</div>
+  </div>
 </div>
+
 <div class="layout">
-  <!-- Sidebar: dates -->
+  <!-- LEFT SIDEBAR: dates -->
   <div class="sidebar">
-    <h3>Dates</h3>
-    <div class="date-item active" onclick="filterDate('all')">All dates <span class="cnt">34</span></div>
-    <div class="date-item today" onclick="filterDate('2026-07-02')">02 Jul 2026 <span class="cnt">4</span></div>
-<div class="date-item " onclick="filterDate('2026-07-01')">01 Jul 2026 <span class="cnt">3</span></div>
-<div class="date-item " onclick="filterDate('2026-06-30')">30 Jun 2026 <span class="cnt">2</span></div>
-<div class="date-item " onclick="filterDate('2026-06-29')">29 Jun 2026 <span class="cnt">1</span></div>
-<div class="date-item " onclick="filterDate('2026-06-28')">28 Jun 2026 <span class="cnt">1</span></div>
-<div class="date-item " onclick="filterDate('2026-06-27')">27 Jun 2026 <span class="cnt">2</span></div>
-<div class="date-item " onclick="filterDate('2026-06-26')">26 Jun 2026 <span class="cnt">3</span></div>
-<div class="date-item " onclick="filterDate('2026-06-25')">25 Jun 2026 <span class="cnt">1</span></div>
-<div class="date-item " onclick="filterDate('2026-06-24')">24 Jun 2026 <span class="cnt">2</span></div>
-<div class="date-item " onclick="filterDate('2026-06-23')">23 Jun 2026 <span class="cnt">15</span></div>
+    <div class="sidebar-title">Archive</div>
+    <div class="date-item active" onclick="filterDate('all')" data-date="all">All Dates <span class="badge">5</span></div>
+    <div class="date-item" onclick="filterDate('2026-07-03')" data-date="2026-07-03">2026-07-03<span class="badge">1</span> (today)</div>
+<div class="date-item" onclick="filterDate('2026-07-02')" data-date="2026-07-02">2026-07-02<span class="badge">4</span></div>
 
   </div>
-
-  <!-- Centre: news cards -->
-  <div class="centre" id="centre">
-    <div class="chips" id="chips">
-      <button class="chip active" onclick="filterCompany('all')">All</button>
-<button class="chip" onclick="filterCompany('IBM')">IBM 🇬🇧</button>
-<button class="chip" onclick="filterCompany('Capgemini')">Capgemini</button>
-<button class="chip" onclick="filterCompany('Deloitte')">Deloitte</button>
-<button class="chip" onclick="filterCompany('CGI')">CGI</button>
-<button class="chip" onclick="filterCompany('PA Consulting')">PA Consulting</button>
-<button class="chip" onclick="filterCompany('Capita')">Capita</button>
-<button class="chip" onclick="filterCompany('PwC')">PwC</button>
-<button class="chip" onclick="filterCompany('Atos/Eviden')">Atos/Eviden 🇬🇧</button>
-<button class="chip" onclick="filterCompany('Fujitsu')">Fujitsu</button>
+  
+  <!-- CENTRE: news cards -->
+  <div class="main">
+    <div class="filter-chips">
+      <button class="chip active" onclick="filterCompany('all', this)">All</button>
+<button class="chip" onclick="filterCompany('IBM', this)">IBM 🇬🇧</button>
+<button class="chip" onclick="filterCompany('Capgemini', this)">Capgemini</button>
+<button class="chip" onclick="filterCompany('Deloitte', this)">Deloitte</button>
+<button class="chip" onclick="filterCompany('CGI', this)">CGI</button>
+<button class="chip" onclick="filterCompany('PA Consulting', this)">PA Consulting</button>
+<button class="chip" onclick="filterCompany('Capita', this)">Capita</button>
+<button class="chip" onclick="filterCompany('PwC', this)">PwC</button>
+<button class="chip" onclick="filterCompany('Atos/Eviden', this)">Atos/Eviden 🇬🇧</button>
+<button class="chip" onclick="filterCompany('Fujitsu', this)">Fujitsu</button>
 
     </div>
-    <div id="cards-container"></div>
+    <div id="cards-container">
+      
+<div class="card" data-company="Capgemini" data-date="2026-07-03">
+  <div class="card-header">
+    <span class="company-tag">Capgemini</span>
+    <span class="date-tag">2026-07-03</span>
   </div>
+  <h3 class="card-headline"><a href="https://www.techmarketview.com/ukhotviews/archive/2026/07/02/capgemini-secures-36m-national-highways-contract" target="_blank" rel="noopener">Capgemini secures £36m National Highways contract</a></h3>
+  <p class="card-summary">Capgemini UK appointed as National Highways Service Management Maturity partner on five-year contract worth £35.9m (ceiling £47.2m), running July 2026 to June 2031. The contract covers IT and OT service management and includes knowledge transfer obligations to build in-house capability within National Highways. The win extends Capgemini's transport sector presence alongside existing National Highways IT framework suppliers.</p>
+  <div class="card-footer">
+    <span class="sent-positive">🟢 +0.7</span>
+    <a href="https://www.techmarketview.com/ukhotviews/archive/2026/07/02/capgemini-secures-36m-national-highways-contract" target="_blank" class="read-more">Read more →</a>
+  </div>
+</div>
 
-  <!-- Right panel: sentiment -->
+<div class="card" data-company="Capita" data-date="2026-07-02">
+  <div class="card-header">
+    <span class="company-tag">Capita</span>
+    <span class="date-tag">2026-07-02</span>
+  </div>
+  <h3 class="card-headline"><a href="https://www.capita.com/news-and-insights/news/2026/Capita-launches-forward-deployed-orchestrator-turn-agentic-ai-measurable-value" target="_blank" rel="noopener">Capita Launches Forward Deployed Orchestrator to Turn Agentic AI into Operational Value</a></h3>
+  <p class="card-summary">Capita has launched the Forward Deployed Orchestrator, a new AI operating model embedding an AI-fluent change specialist directly inside client operations. Positioned to compete for UK Government programmes such as the DBT AI3 contract, early results include saving over 1,000 management hours in four months and cutting screening time by 43%.</p>
+  <div class="card-footer">
+    <span class="sent-positive">🟢 +0.7</span>
+    <a href="https://www.capita.com/news-and-insights/news/2026/Capita-launches-forward-deployed-orchestrator-turn-agentic-ai-measurable-value" target="_blank" class="read-more">Read more →</a>
+  </div>
+</div>
+
+<div class="card" data-company="Deloitte" data-date="2026-07-02">
+  <div class="card-header">
+    <span class="company-tag">Deloitte</span>
+    <span class="date-tag">2026-07-02</span>
+  </div>
+  <h3 class="card-headline"><a href="https://www.techmarketview.com/ukhotviews/archive/2026/07/01/home-office-splits-350m-data-deal-between-deloitte-and-pa-consulting" target="_blank" rel="noopener">Home Office splits £350m data deal between Deloitte and PA Consulting</a></h3>
+  <p class="card-summary">The UK Home Office committed up to £350m to its Data Services and Analytics unit, awarding Lot A (up to £200m) to Deloitte via the Digital Specialists and Programmes framework. The four-year contract sees Deloitte provide integrated data teams to implement the Home Office data strategy, consolidating its deep account position.</p>
+  <div class="card-footer">
+    <span class="sent-positive">🟢 +0.8</span>
+    <a href="https://www.techmarketview.com/ukhotviews/archive/2026/07/01/home-office-splits-350m-data-deal-between-deloitte-and-pa-consulting" target="_blank" class="read-more">Read more →</a>
+  </div>
+</div>
+
+<div class="card" data-company="Fujitsu" data-date="2026-07-02">
+  <div class="card-header">
+    <span class="company-tag">Fujitsu</span>
+    <span class="date-tag">2026-07-02</span>
+  </div>
+  <h3 class="card-headline"><a href="https://www.postofficescandal.uk/post/horizon-compensation-advisory-board-come-out-swinging/" target="_blank" rel="noopener">Post Office Horizon Compensation Postcode Lottery Exposed — Advisory Board Urges Government Action</a></h3>
+  <p class="card-summary">The Horizon Compensation Advisory Board has written to the government urging action on three groups of Post Office Horizon scandal victims treated differently in Scotland versus England and Wales. The letter was sent on 16 June but has yet to receive a reply.</p>
+  <div class="card-footer">
+    <span class="sent-caution">🟠 -0.5</span>
+    <a href="https://www.postofficescandal.uk/post/horizon-compensation-advisory-board-come-out-swinging/" target="_blank" class="read-more">Read more →</a>
+  </div>
+</div>
+
+<div class="card" data-company="PA Consulting" data-date="2026-07-02">
+  <div class="card-header">
+    <span class="company-tag">PA Consulting</span>
+    <span class="date-tag">2026-07-02</span>
+  </div>
+  <h3 class="card-headline"><a href="https://www.techmarketview.com/ukhotviews/archive/2026/07/01/home-office-splits-350m-data-deal-between-deloitte-and-pa-consulting" target="_blank" rel="noopener">PA Consulting wins £150m Home Office Data Professions contract in shared £350m award</a></h3>
+  <p class="card-summary">PA Consulting secured Lot B of the Home Office Data Services and Analytics contract (up to £150m over four years), supplying specialist data professionals and teams. This extends PA's remarkable public sector run since January 2026 with contracts from DfT, MoD and multiple Home Office engagements worth over £200m in total.</p>
+  <div class="card-footer">
+    <span class="sent-positive">🟢 +0.8</span>
+    <a href="https://www.techmarketview.com/ukhotviews/archive/2026/07/01/home-office-splits-350m-data-deal-between-deloitte-and-pa-consulting" target="_blank" class="read-more">Read more →</a>
+  </div>
+</div>
+
+    </div>
+    <div id="no-results" class="no-results" style="display:none;">No stories match the current filter.</div>
+  </div>
+  
+  <!-- RIGHT PANEL: sentiment -->
   <div class="right-panel">
-    <h3>7-Day Sentiment</h3>
-    <div class="sent-row">
-  <div class="sent-co">IBM 🇬🇧</div>
-  <div class="bar-wrap"><div class="bar" style="width:50%;background:#8b949e"></div></div>
-  <div class="sent-info">⚪ Neutral</div>
-</div>
+    <div class="panel-title">7-Day Sentiment</div>
+    
 <div class="sent-row">
-  <div class="sent-co">Capgemini</div>
-  <div class="bar-wrap"><div class="bar" style="width:90%;background:#3fb950"></div></div>
-  <div class="sent-info">🟢 Positive</div>
-</div>
-<div class="sent-row">
-  <div class="sent-co">Deloitte</div>
-  <div class="bar-wrap"><div class="bar" style="width:74%;background:#58a6ff"></div></div>
-  <div class="sent-info">🟡 Neutral+</div>
-</div>
-<div class="sent-row">
-  <div class="sent-co">CGI</div>
-  <div class="bar-wrap"><div class="bar" style="width:75%;background:#3fb950"></div></div>
-  <div class="sent-info">🟢 Positive</div>
-</div>
-<div class="sent-row">
-  <div class="sent-co">PA Consulting</div>
-  <div class="bar-wrap"><div class="bar" style="width:92%;background:#3fb950"></div></div>
-  <div class="sent-info">🟢 Positive</div>
-</div>
-<div class="sent-row">
-  <div class="sent-co">Capita</div>
-  <div class="bar-wrap"><div class="bar" style="width:25%;background:#d29922"></div></div>
-  <div class="sent-info">🟠 Caution</div>
-</div>
-<div class="sent-row">
-  <div class="sent-co">PwC</div>
-  <div class="bar-wrap"><div class="bar" style="width:65%;background:#58a6ff"></div></div>
-  <div class="sent-info">🟡 Neutral+</div>
-</div>
-<div class="sent-row">
-  <div class="sent-co">Atos/Eviden 🇬🇧</div>
-  <div class="bar-wrap"><div class="bar" style="width:50%;background:#8b949e"></div></div>
-  <div class="sent-info">⚪ Neutral</div>
-</div>
-<div class="sent-row">
-  <div class="sent-co">Fujitsu</div>
-  <div class="bar-wrap"><div class="bar" style="width:25%;background:#f85149"></div></div>
-  <div class="sent-info">🔴 Negative</div>
+  <div class="sent-name">IBM 🇬🇧</div>
+  <div class="sent-info">
+    <span>⚪ Neutral</span>
+    <span class="sent-score">+0.00</span>
+  </div>
+  <div class="sent-bar-bg">
+    <div class="sent-bar-fill" style="width:50%;background:#94a3b8;"></div>
+  </div>
+  <div class="sent-count">0 articles (7d)</div>
 </div>
 
+<div class="sent-row">
+  <div class="sent-name">Capgemini</div>
+  <div class="sent-info">
+    <span>🟢 Positive</span>
+    <span class="sent-score">+0.75</span>
+  </div>
+  <div class="sent-bar-bg">
+    <div class="sent-bar-fill" style="width:87%;background:#22c55e;"></div>
+  </div>
+  <div class="sent-count">2 articles (7d)</div>
+</div>
+
+<div class="sent-row">
+  <div class="sent-name">Deloitte</div>
+  <div class="sent-info">
+    <span>🟡 Neutral+</span>
+    <span class="sent-score">+0.49</span>
+  </div>
+  <div class="sent-bar-bg">
+    <div class="sent-bar-fill" style="width:74%;background:#eab308;"></div>
+  </div>
+  <div class="sent-count">4 articles (7d)</div>
+</div>
+
+<div class="sent-row">
+  <div class="sent-name">CGI</div>
+  <div class="sent-info">
+    <span>🟢 Positive</span>
+    <span class="sent-score">+0.50</span>
+  </div>
+  <div class="sent-bar-bg">
+    <div class="sent-bar-fill" style="width:75%;background:#22c55e;"></div>
+  </div>
+  <div class="sent-count">1 article (7d)</div>
+</div>
+
+<div class="sent-row">
+  <div class="sent-name">PA Consulting</div>
+  <div class="sent-info">
+    <span>🟢 Positive</span>
+    <span class="sent-score">+0.85</span>
+  </div>
+  <div class="sent-bar-bg">
+    <div class="sent-bar-fill" style="width:92%;background:#22c55e;"></div>
+  </div>
+  <div class="sent-count">1 article (7d)</div>
+</div>
+
+<div class="sent-row">
+  <div class="sent-name">Capita</div>
+  <div class="sent-info">
+    <span>🟠 Caution</span>
+    <span class="sent-score">-0.49</span>
+  </div>
+  <div class="sent-bar-bg">
+    <div class="sent-bar-fill" style="width:25%;background:#f97316;"></div>
+  </div>
+  <div class="sent-count">6 articles (7d)</div>
+</div>
+
+<div class="sent-row">
+  <div class="sent-name">PwC</div>
+  <div class="sent-info">
+    <span>🟡 Neutral+</span>
+    <span class="sent-score">+0.30</span>
+  </div>
+  <div class="sent-bar-bg">
+    <div class="sent-bar-fill" style="width:65%;background:#eab308;"></div>
+  </div>
+  <div class="sent-count">1 article (7d)</div>
+</div>
+
+<div class="sent-row">
+  <div class="sent-name">Atos/Eviden 🇬🇧</div>
+  <div class="sent-info">
+    <span>⚪ Neutral</span>
+    <span class="sent-score">+0.00</span>
+  </div>
+  <div class="sent-bar-bg">
+    <div class="sent-bar-fill" style="width:50%;background:#94a3b8;"></div>
+  </div>
+  <div class="sent-count">0 articles (7d)</div>
+</div>
+
+<div class="sent-row">
+  <div class="sent-name">Fujitsu</div>
+  <div class="sent-info">
+    <span>🔴 Negative</span>
+    <span class="sent-score">-0.50</span>
+  </div>
+  <div class="sent-bar-bg">
+    <div class="sent-bar-fill" style="width:25%;background:#f97316;"></div>
+  </div>
+  <div class="sent-count">3 articles (7d)</div>
+</div>
+
+    <div style="margin-top:20px;border-top:1px solid #1e293b;padding-top:14px;">
+      <div style="font-size:10px;color:#475569;line-height:1.6;">
+        🟢 ≥0.5 Positive<br/>
+        🟡 0.1–0.49 Neutral+<br/>
+        ⚪ -0.1–0.09 Neutral<br/>
+        🟠 -0.49– -0.11 Caution<br/>
+        🔴 ≤-0.5 Negative
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- Chat widget -->
-<button class="chat-btn" onclick="toggleChat()">💬 Ask Watchtower</button>
+<!-- CHAT WIDGET -->
+<button class="chat-btn" onclick="toggleChat()">
+  💬 Ask Watchtower
+</button>
+
 <div class="chat-modal" id="chatModal">
   <div class="chat-header">
-    <span>💬 Watchtower Assistant</span>
-    <span style="cursor:pointer;color:#8b949e" onclick="toggleChat()">✕</span>
+    <h3>📡 Watchtower Assistant</h3>
+    <button class="chat-close" onclick="toggleChat()">×</button>
   </div>
-  <div class="chat-messages" id="chatMessages">
-    <div style="color:#58a6ff;margin-bottom:8px">Hi! Ask me about UK public sector news for any company.</div>
-  </div>
-  <div class="chat-input-row">
-    <input type="text" id="chatInput" placeholder="Ask a question..." onkeydown="if(event.key==='Enter')sendChat()">
-    <button onclick="sendChat()">Send</button>
+  <div class="chat-body">
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-msg">👋 Ask me about UKI public sector news...</div>
+    </div>
+    <div class="chat-input-row">
+      <input class="chat-input" id="chatInput" placeholder="Type a question..." onkeypress="if(event.key==='Enter')sendChat()"/>
+      <button class="chat-send" onclick="sendChat()">Send</button>
+    </div>
   </div>
 </div>
 
 <script>
-const STORIES = [{"date": "2026-07-02", "company": "Capita", "headline": "Capita Launches Forward Deployed Orchestrator to Turn Agentic AI into Operational Value", "summary": "Capita has launched the Forward Deployed Orchestrator\u2122 (FDO), a new AI operating model that embeds an AI-fluent process and change specialist directly inside client operations to own sustained AI performance after go-live. The model is explicitly positioned to compete for UK Government programmes such as the DBT AI\u00b3 contract. Early results include saving over 1,000 management hours in four months and cutting candidate screening time by 43% in an internal deployment using Salesforce Agentforce.", "url": "https://www.capita.com/news-and-insights/news/2026/Capita-launches-forward-deployed-orchestrator-turn-agentic-ai-measurable-value", "sentiment": 0.65}, {"date": "2026-07-02", "company": "Deloitte", "headline": "Home Office splits \u00a3350m data deal between Deloitte and PA Consulting", "summary": "The UK Home Office has committed up to \u00a3350m to enhance its Data Services and Analytics (DSA) unit, awarding Lot A (capped at \u00a3200m) to Deloitte via the Digital Specialists and Programmes framework. Signed in late May 2026, the four-year contract sees Deloitte provide integrated data teams to implement the Home Office data strategy. This consolidates Deloitte's deep Home Office account and follows a recent \u00a3132m win and an HMRC data discovery contract.", "url": "https://www.techmarketview.com/ukhotviews/archive/2026/07/01/home-office-splits-350m-data-deal-between-deloitte-and-pa-consulting", "sentiment": 0.8}, {"date": "2026-07-02", "company": "Fujitsu", "headline": "Post Office Horizon Compensation Postcode Lottery Exposed \u2014 Advisory Board Urges Government Action", "summary": "The Horizon Compensation Advisory Board has written to the government urging action on three groups of Post Office Horizon scandal victims who are being treated differently in Scotland versus England and Wales. Issues include DWP-prosecuted subpostmasters, refused pre-2024 Court of Appeal cases, and Capture-system convictions. The June 16 letter has yet to receive a government reply.", "url": "https://www.postofficescandal.uk/post/horizon-compensation-advisory-board-come-out-swinging/", "sentiment": -0.5}, {"date": "2026-07-02", "company": "PA Consulting", "headline": "PA Consulting wins \u00a3150m Home Office Data Professions contract in shared \u00a3350m award", "summary": "PA Consulting has secured Lot B of the Home Office's \u00a3350m Data Services and Analytics contract, valued at up to \u00a3150m over four years, supplying specialist data professionals and teams. This extends PA's remarkable public sector run since January 2026 with wins from DfT, MoD, National Armaments Director Group, and multiple Home Office engagements worth over \u00a3200m.", "url": "https://www.techmarketview.com/ukhotviews/archive/2026/07/01/home-office-splits-350m-data-deal-between-deloitte-and-pa-consulting", "sentiment": 0.85}, {"date": "2026-07-01", "company": "Capgemini", "headline": "HMRC selects Capgemini, NICE and Route 101 for customer service transformation", "summary": "HMRC has selected Capgemini alongside NICE and Route 101 to deliver its next-phase customer experience transformation programme, introducing NICE's CXone cloud contact centre platform across HMRC's customer service operations. The contract replaces legacy technology with AI-enabled capabilities designed to improve both citizen and adviser experiences.", "url": "https://www.thinkdigitalpartners.com/news/2026/06/30/uk-digital-procurement-roundup-june-2026-contracts-frameworks-and-market-moves/", "sentiment": 0.8}, {"date": "2026-07-01", "company": "Capita", "headline": "Capita makes partial progress on Civil Service Pension Scheme but misses full end-of-June recovery deadline", "summary": "Capita can now process new retirees' pension requests with timely payment, marking partial progress in the Civil Service Pension Scheme crisis. However, the retirement modeller remains unavailable with no launch timescale confirmed, and the PCS union stated Capita has missed its contractual end-of-June full recovery deadline.", "url": "https://www.civilserviceworld.com/professions/article/angela-macdonald-capita-is-now-ready-to-pay-new-retirees-pensions-on-time", "sentiment": -0.5}, {"date": "2026-07-01", "company": "Fujitsu", "headline": "Post Office delays signing Horizon replacement contract for third time", "summary": "The Post Office has delayed for a third time the formal signing of a \u00a3169.2m contract to replace Fujitsu's ageing Horizon EPOS system. No new signing date has been confirmed, meaning Fujitsu's Horizon system will continue operating beyond its original replacement timeline.", "url": "https://www.computerweekly.com/news/366645261/Post-Office-delays-signing-Horizon-replacement-for-third-time", "sentiment": -0.5}, {"date": "2026-06-30", "company": "Capita", "headline": "Capita Issues 9,500 UK Pension Quotes Amid Severe Public Sector Backlog Crisis", "summary": "The UK government confirmed Capita issued 9,500 overdue retirement quotations from an initial backlog of 23,000 outstanding civil service pension quotes. Cabinet Office imposed financial penalties while authorising emergency transitional loans of up to \u00a320,000 for stranded retirees.", "url": "https://streamlinefeed.co.ke/news/capita-issues-9500-uk-pension-quotes-amid-severe-public-sector-backlog-crisis", "sentiment": -0.8}, {"date": "2026-06-30", "company": "Deloitte", "headline": "Economic Challenges Facing the New Prime Minister \u2014 Deloitte UK Monday Briefing", "summary": "Deloitte UK Chief Economist analyses the fiscal and economic challenges awaiting incoming PM Andy Burnham. Key issues include record-high public spending at ~45% of GDP, limited borrowing headroom, and the highest tax burden since the 1940s. Burnham has committed to existing fiscal rules while exploring infrastructure investment and AI-led productivity gains.", "url": "https://www.deloitte.com/uk/en/blogs/monday-briefing/economic-challenges-facing-the-new-prime-minister.html", "sentiment": 0.0}, {"date": "2026-06-29", "company": "Capita", "headline": "Capita Civil Service Pension Recovery to Miss June 30 Deadline", "summary": "The Cabinet Office has confirmed that Capita will not fully resolve the Civil Service Pension Scheme backlog by its June 30 recovery deadline, with around 6,500 retirement quotations still outstanding. A joint Parliamentary Public Accounts Committee and Public Administration hearing has been scheduled for July 8.", "url": "https://www.cspa.co.uk/news/civil-service-pension-scheme-latest-recovery-update/", "sentiment": -0.65}, {"date": "2026-06-28", "company": "Capita", "headline": "'Dad died with nothing': Inside the Civil Service Pension Meltdown", "summary": "The Times published a harrowing account of Capita's ongoing failures managing the UK Civil Service Pension Scheme. Tens of thousands of civil servants have suffered from delayed, incorrect, or missing pension payments \u2014 with one family reporting a retiree died with nothing after payments were not processed.", "url": "https://www.thetimes.com/money/pensions/article/civil-service-pension-meltdown-capita-failure-money-fmls8b2bq", "sentiment": -0.85}, {"date": "2026-06-27", "company": "Deloitte", "headline": "Deloitte Partners with Google Cloud to Drive UK Public Sector Agentic AI Adoption", "summary": "TechMarketView highlights Deloitte as a leading partner in shaping how agentic AI is delivered for UK public sector organisations, with multiple announcements involving government clients at the Google Cloud London Summit. The summit marked a shift from AI pilots to production-grade agentic systems across Whitehall.", "url": "https://www.techmarketview.com/ukhotviews/archive/2026/06/26/new-research-google-cloud-summit-2026-agentic-ambition-meets-enterprise-reality", "sentiment": 0.45}, {"date": "2026-06-27", "company": "PwC", "headline": "PwC Ireland Calls on Government to Use Budget 2027 as Platform for Innovation and Long-Term Growth", "summary": "PwC Ireland has called on the Irish Government to use Budget 2027 as a strategic platform for long-term economic competitiveness, proposing measures across tax reform, clean energy investment, and housing delivery. The submission positions PwC as a prominent voice in shaping Ireland's public finance priorities.", "url": "https://www.thinkbusiness.ie/articles/pwc-budget-2027-ireland-innovation-energy-housing-growth/", "sentiment": 0.3}, {"date": "2026-06-26", "company": "CGI", "headline": "CGI's MyCare.Scot NHS App Expands to Hospital Services Across Scotland", "summary": "Scotland's digital health portal MyCare.Scot, delivered by CGI under a \u00a327.8 million Scottish Government contract, is expanding from dermatology outpatients to broader hospital-based services nationwide. The platform gives patients instant access to their health data and will eventually cover GP practices, pharmacy, social work and social care.", "url": "https://www.digitalhealth.net/2026/06/digital-health-coffee-time-briefing-%E2%98%95-178/", "sentiment": 0.5}, {"date": "2026-06-26", "company": "Capita", "headline": "Capita Chaos Is Destroying Health and Finances of Civil Service Pension Members", "summary": "The PCS civil service union published harrowing testimonies from civil servants unable to access their pensions due to Capita's mishandling of the Civil Service Pension Scheme. The pension backlog grew 40% to 120,000 cases in just the first seven weeks of Capita's contract.", "url": "https://www.pcs.org.uk/news-events/news/capita-chaos-destroying-our-health-finances", "sentiment": -0.8}, {"date": "2026-06-26", "company": "Fujitsu", "headline": "Former Post Office Legal Boss Referred to Disciplinary Council Over Horizon Scandal", "summary": "The UK SRA has referred the Post Office's former general counsel Jane MacLeod to a disciplinary tribunal for failing to give evidence at the statutory Horizon IT public inquiry. Fujitsu, as supplier of the faulty Horizon system, faces continued reputational pressure as legal proceedings proliferate.", "url": "https://www.computerweekly.com/news/366645057/Former-Post-Office-legal-boss-referred-to-disciplinary-council", "sentiment": -0.5}, {"date": "2026-06-25", "company": "Deloitte", "headline": "Home Office Expands Deloitte Contract for Online Application Services to Top \u00a3130m", "summary": "The Home Office has awarded Deloitte a new five-year contract worth \u00a3131.65m to support its Apply for Things migration and borders services \u2014 covering visa and leave-to-remain applications \u2014 running from September 2026 to August 2030.", "url": "https://www.publictechnology.net/2026/06/24/international-relations/home-office-expands-contract-for-online-application-services-to-top-130m/", "sentiment": 0.7}, {"date": "2026-06-24", "company": "Capita", "headline": "Capita Civil Service Pension Recovery: June 30 Deadline Likely to Be Missed", "summary": "With 13,000 retirement quotations still outstanding as of 17 June, civil service unions described the end-of-June recovery target as 'completely fanciful.' Parliamentary scrutiny is scheduled for a joint PAC/PAAC session on 8 July.", "url": "https://www.cspa.co.uk/news/june-deadline/", "sentiment": -0.8}, {"date": "2026-06-24", "company": "Fujitsu", "headline": "Fujitsu Still Collecting Government Contracts Despite Zero Contribution to Horizon Compensation", "summary": "An i Paper analysis spotlights that Fujitsu has not contributed a single penny to the \u00a32 billion Post Office Horizon compensation bill while continuing to hold UK government contracts through 'existing customer' exemptions to its voluntary bidding pause.", "url": "https://inews.co.uk", "sentiment": -0.7}, {"date": "2026-06-23", "company": "Atos/Eviden", "headline": "Atos invests in UK secure infrastructure to capture growing public sector IT market", "summary": "Atos has established new UK-based data and AI infrastructure with military-grade security, as part of a strategic push to grow its public sector business. Atos currently holds 37 live UK public sector contracts worth \u00a31.3bn, including agreements with MoD, HMRC, Home Office, and NSIB.", "url": "https://www.computerweekly.com/news/366632825/Frances-Atos-eyes-UK-public-sector-with-investment-in-secure-UK-infrastructure", "sentiment": 0.3}, {"date": "2026-06-23", "company": "CGI", "headline": "CGI awarded \u00a3250m HMRC Enterprise Integration Services contract to modernise IT estate", "summary": "CGI has been awarded a contract worth up to \u00a3250 million over five years by HMRC to operate and maintain integration services across HMRC's IT estate. The contract deepens CGI's existing partnership with HMRC and supports the broader modernisation of government digital infrastructure.", "url": "https://www.cgi.com/en/cgi-awarded-250-million-enterprise-integration-services-contract-his-majesty-revenue-customs-uk", "sentiment": 0.72}, {"date": "2026-06-23", "company": "CGI", "headline": "CGI UK Delivers Borealis Satellite-Tracking System Six Months Ahead of Schedule", "summary": "The UK MoD announced that Borealis \u2014 the country's new satellite threat-tracking software \u2014 has reached full operational capability six months ahead of schedule. Delivered by CGI UK under a \u00a365 million five-year contract.", "url": "https://www.strategical.org.uk/strategical-briefing/riat-2026-cancelled", "sentiment": 0.82}, {"date": "2026-06-23", "company": "Capgemini", "headline": "Capgemini Wins HMRC Migration Partner Role as First SAP Sovereign Cloud Partner", "summary": "Capgemini has been appointed by HMRC as Migration Delivery Partner to modernise the UK's Enterprise Tax Management Platform \u2014 processing over \u00a3875 billion annually. The win coincides with Capgemini becoming the world's first SAP Sovereign Cloud Partner.", "url": "https://www.capgemini.com/gb-en/news/press-releases/capgemini-becomes-first-to-receive-the-sap-sovereign-cloud-partner-designation/", "sentiment": 0.85}, {"date": "2026-06-23", "company": "Capgemini", "headline": "HMRC signs \u00a3600m multi-year deal with Capgemini to digitise customer service with AI", "summary": "HMRC has awarded a multi-year contract worth up to \u00a3600 million to Capgemini, NiCE, and Route 101 to overhaul its customer service operations via an AI-powered cloud contact centre.", "url": "https://www.capgemini.com/us-en/news/press-releases/capgemini-nice-and-route-101-to-meet-evolving-needs-of-uk-citizens/", "sentiment": 0.8}, {"date": "2026-06-23", "company": "Capita", "headline": "Capita secures decade-long \u00a3959m Synergy government contract for four major departments", "summary": "Capita has been awarded the Synergy Business Process Services contract worth up to \u00a3959m over 10 years to deliver IT-enabled back-office services for the DWP, Ministry of Justice, Home Office, and Defra. The win comes despite ongoing public scrutiny of Capita's performance on its civil service pension contract.", "url": "https://www.computerweekly.com/news/366639758/Capita-secures-decade-long-government-contract-amid-failure-in-public-sight", "sentiment": 0.4}, {"date": "2026-06-23", "company": "Deloitte", "headline": "Deloitte Launches London AI Studio with Google Cloud to Spearhead UK Agentic AI Transition", "summary": "Deloitte opened a new AI Studio on its London campus in partnership with Google Cloud, designed to help UK organisations move from AI experimentation to production-ready agentic systems. Public sector is explicitly named among the first focus industries.", "url": "https://www.deloitte.com/uk/en/about/press-room/deloitte-and-google-cloud-collaborate-to-launch-london-ai-studio.html", "sentiment": 0.65}, {"date": "2026-06-23", "company": "Deloitte", "headline": "Deloitte wins \u00a3132m Home Office contract despite government's consultancy spending crackdown", "summary": "Deloitte has secured a \u00a3132 million contract with the Home Office, a significant win even as the UK government pursues targets to halve consultancy expenditure. The contract demonstrates flagship transformation programmes continue to attract major consulting firms.", "url": "https://www.techmarketview.com/ukhotviews/archive/2026/06/17/deloitte-wins-132m-home-office-contract", "sentiment": 0.7}, {"date": "2026-06-23", "company": "Fujitsu", "headline": "Post Office signs \u00a3492m contracts with Accenture and One View Commerce to replace Horizon", "summary": "The UK Post Office has awarded Accenture a \u00a3322.8m contract and One View Commerce a \u00a3169.2m contract to replace Fujitsu's controversial Horizon system. Fujitsu will continue supporting Horizon during a managed transition, marking the end of a 25-year relationship worth more than \u00a32.5bn.", "url": "https://www.datacenterdynamics.com/en/news/fujitsu-finally-set-to-exit-uk-post-office-it-contract/", "sentiment": -0.55}, {"date": "2026-06-23", "company": "IBM", "headline": "IBM wins \u00a3320m UK MOD DEEAMS contract to modernise defence asset management", "summary": "The Ministry of Defence has awarded IBM UK a \u00a3320 million contract to deliver the Defence Equipment Engineering Asset Management Systems (DEEAMS), replacing 17 fragmented legacy applications with a single AI-powered platform serving 65,000 users.", "url": "https://www.gov.uk/government/news/boost-to-jobs-and-military-capability-with-new-defence-equipment-system", "sentiment": 0.75}, {"date": "2026-06-23", "company": "IBM", "headline": "IBM Study: AI Investment in UK & Ireland Set to Surge 67% by 2028", "summary": "A new IBM Institute for Business Value study reveals AI investment in the UK and Ireland is forecast to surge 67% by 2028, yet only 13% of technology leaders feel fully prepared for the scale of AI agent deployment expected in the next 12 months.", "url": "https://uk.newsroom.ibm.com/2026-ibm-study-ai-investment-in-uki-is-set-to-surge", "sentiment": 0.35}, {"date": "2026-06-23", "company": "IBM", "headline": "IBM Marks 70 Years in Ireland with \u20ac11.5M Tech Donation to SETU Waterford", "summary": "IBM celebrated its 70th anniversary in Ireland by donating an \u20ac11.5 million technology system \u2014 including an IBM z17 mainframe \u2014 to South East Technological University (SETU) Waterford, attended by the Taoiseach.", "url": "https://uk.newsroom.ibm.com/IBM-celebrates-70-years-in-ireland", "sentiment": 0.65}, {"date": "2026-06-23", "company": "PA Consulting", "headline": "Jiten Kachhela Named President of PA Consulting as Firm Enters New Chapter Under Jacobs", "summary": "Jacobs has appointed Jiten Kachhela as President of PA Consulting. He succeeds CEO Christian Norris, who led the firm through Jacobs' full acquisition of PA, creating what Jacobs describes as a 'global advisory and delivery powerhouse.'", "url": "https://www.paconsulting.com/newsroom/jiten-kachhela-announced-as-president-of-pa-consulting-10-june-2026", "sentiment": 0.3}, {"date": "2026-06-23", "company": "PwC", "headline": "PwC Warns Record UK Borrowing of \u00a323.3bn in May Leaves Public Finances Exposed", "summary": "PwC UK economist Nabil Taleb has warned that May 2026's public sector net borrowing of \u00a323.3 billion \u2014 \u00a35.6 billion above OBR forecasts \u2014 leaves the UK government with little fiscal headroom. Debt interest hit a May record of \u00a311.7 billion.", "url": "https://www.pwc.co.uk/press-room/press-releases/research-commentary/2026/pwc-comments-on-public-sector-finance-data---june-2026.html", "sentiment": -0.15}, {"date": "2026-06-23", "company": "PwC", "headline": "PwC leads MCA Awards 2026 shortlist with 33 nominations", "summary": "PwC has the highest representation on the 2026 Management Consulting Association (MCA) Awards shortlist, with 33 projects and individuals recognised as finalists, as UK government consulting spend reached a record \u00a33.7 billion in 2024/25.", "url": "https://www.consultancy.uk/news/44186/government-consulting-spend-hits-37-billion", "sentiment": 0.35}];
+  let currentDateFilter = 'all';
+  let currentCompanyFilter = 'all';
 
-let currentDate = 'all';
-let currentCompany = 'all';
-
-function renderCards() {
-  let filtered = STORIES;
-  if (currentDate !== 'all') filtered = filtered.filter(s => s.date === currentDate);
-  if (currentCompany !== 'all') filtered = filtered.filter(s => s.company === currentCompany);
-
-  // Group by date
-  const byDate = {};
-  filtered.forEach(s => {
-    if (!byDate[s.date]) byDate[s.date] = [];
-    byDate[s.date].push(s);
-  });
-
-  const dates = Object.keys(byDate).sort().reverse();
-  const container = document.getElementById('cards-container');
-  
-  if (filtered.length === 0) {
-    container.innerHTML = '<div class="no-results">No stories match your filter.</div>';
-    return;
+  function filterDate(date) {
+    currentDateFilter = date;
+    document.querySelectorAll('.date-item').forEach(el => el.classList.remove('active'));
+    document.querySelector(`[data-date="${date}"]`).classList.add('active');
+    applyFilters();
   }
 
-  container.innerHTML = dates.map(d => {
-    const stories = byDate[d];
-    const dtParts = d.split('-');
-    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const fmtDate = `${dtParts[2]} ${months[parseInt(dtParts[1])-1]} ${dtParts[0]}`;
-    return `<div class="date-group">
-      <div class="date-label">📅 ${fmtDate}</div>
-      ${stories.map(s => sentCard(s)).join('')}
-    </div>`;
-  }).join('');
-}
+  function filterCompany(company, btn) {
+    currentCompanyFilter = company;
+    document.querySelectorAll('.chip').forEach(el => el.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilters();
+  }
 
-function sentCard(s) {
-  let emoji = '⚪', color = '#8b949e';
-  if (s.sentiment >= 0.5) { emoji = '🟢'; color = '#3fb950'; }
-  else if (s.sentiment >= 0.1) { emoji = '🟡'; color = '#58a6ff'; }
-  else if (s.sentiment >= -0.1) { emoji = '⚪'; color = '#8b949e'; }
-  else if (s.sentiment >= -0.5) { emoji = '🟠'; color = '#d29922'; }
-  else { emoji = '🔴'; color = '#f85149'; }
-  
-  return `<div class="card">
-    <div class="co-badge">${s.company}</div>
-    <h3>${s.headline} <span class="sent-chip" style="color:${color}">${emoji}</span></h3>
-    <p>${s.summary}</p>
-    <a href="${s.url}" target="_blank">📰 Read more →</a>
-  </div>`;
-}
+  function applyFilters() {
+    const cards = document.querySelectorAll('.card');
+    let visible = 0;
+    cards.forEach(card => {
+      const dateMatch = currentDateFilter === 'all' || card.dataset.date === currentDateFilter;
+      const compMatch = currentCompanyFilter === 'all' || card.dataset.company === currentCompanyFilter;
+      if (dateMatch && compMatch) {
+        card.style.display = '';
+        visible++;
+      } else {
+        card.style.display = 'none';
+      }
+    });
+    document.getElementById('no-results').style.display = visible === 0 ? '' : 'none';
+  }
 
-function filterDate(d) {
-  currentDate = d;
-  document.querySelectorAll('.date-item').forEach(el => el.classList.remove('active'));
-  event.currentTarget.classList.add('active');
-  renderCards();
-}
+  function toggleChat() {
+    const modal = document.getElementById('chatModal');
+    modal.classList.toggle('open');
+  }
 
-function filterCompany(co) {
-  currentCompany = co;
-  document.querySelectorAll('.chip').forEach(el => el.classList.remove('active'));
-  event.currentTarget.classList.add('active');
-  renderCards();
-}
-
-function toggleChat() {
-  const modal = document.getElementById('chatModal');
-  modal.classList.toggle('open');
-}
-
-function sendChat() {
-  const input = document.getElementById('chatInput');
-  const msg = input.value.trim();
-  if (!msg) return;
-  const msgs = document.getElementById('chatMessages');
-  msgs.innerHTML += `<div style="color:#e6edf3;margin:6px 0"><strong>You:</strong> ${msg}</div>`;
-  input.value = '';
-  
-  fetch('https://api.tasklet.ai/webhook/uki-ps-watchtower', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({type: 'chat', message: msg})
-  }).then(r => r.json()).then(d => {
-    msgs.innerHTML += `<div style="color:#58a6ff;margin:6px 0"><strong>Watchtower:</strong> ${d.reply || 'Thanks, I have logged your message.'}</div>`;
-    msgs.scrollTop = msgs.scrollHeight;
-  }).catch(() => {
-    msgs.innerHTML += `<div style="color:#8b949e;margin:6px 0">Message received. (Chat responses will be enabled in a future update.)</div>`;
-    msgs.scrollTop = msgs.scrollHeight;
-  });
-}
-
-// Initial render
-renderCards();
+  function sendChat() {
+    const input = document.getElementById('chatInput');
+    const msg = input.value.trim();
+    if (!msg) return;
+    
+    const messages = document.getElementById('chatMessages');
+    messages.innerHTML += `<div class="chat-msg" style="background:#1e3a5f;color:#e2e8f0;">You: ${msg}</div>`;
+    input.value = '';
+    
+    // Send to webhook
+    fetch('https://hooks.tasklet.ai/webhook/uki-ps-watchtower', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({type: 'chat', message: msg})
+    }).catch(() => {});
+    
+    // Show acknowledgement
+    setTimeout(() => {
+      messages.innerHTML += `<div class="chat-msg">Watchtower: Query received. Check back in your briefing for analysis.</div>`;
+      messages.scrollTop = messages.scrollHeight;
+    }, 800);
+    messages.scrollTop = messages.scrollHeight;
+  }
 </script>
+
 </body>
 </html>
