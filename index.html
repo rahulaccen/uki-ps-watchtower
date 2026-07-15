@@ -781,150 +781,65 @@ function toggleChat() {
 
 function askSuggestion(btn) {
   document.getElementById('chat-input').value = btn.textContent;
-  document.getElementById('chat-suggestions').style.display = 'none';
   sendChat();
 }
 
-function sendChat() {
+function generateChatId() {
+  return 'chat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+}
+
+async function pollForResponse(chatId) {
+  const base = `https://raw.githubusercontent.com/rahulaccen/uki-ps-watchtower/gh-pages/chat/${chatId}.json`;
+  for (let i = 0; i < 20; i++) {
+    await new Promise(r => setTimeout(r, 3000));
+    try {
+      const res = await fetch(`${base}?t=${Date.now()}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.answer) return data.answer;
+      }
+    } catch (e) {}
+  }
+  return null;
+}
+
+async function sendChat() {
   const input = document.getElementById('chat-input');
   const query = input.value.trim();
   if (!query) return;
   input.value = '';
+
   addMsg(query, 'user');
-  setTimeout(() => {
-    const reply = processQuery(query);
-    addMsg(reply, 'bot');
-  }, 300);
+  const thinkingEl = addMsg('💭 Thinking…', 'bot');
+  thinkingEl.style.opacity = '0.6';
+  thinkingEl.style.fontStyle = 'italic';
+
+  const chatId = generateChatId();
+
+  // Fire webhook (no-cors so browser doesn't block — response comes via polling)
+  const url = new URL('https://webhooks.tasklet.ai/v1/public/webhook/a_cmb2qhv4fpdp1mjfsbj1?token=7149aad29a3e79202d0df5f2c104434d');
+  url.searchParams.set('q', query);
+  url.searchParams.set('chatId', chatId);
+  try {
+    await fetch(url.toString(), { mode: 'no-cors' });
+  } catch (e) {}
+
+  // Poll gh-pages for the AI answer
+  const answer = await pollForResponse(chatId);
+  thinkingEl.remove();
+  addMsg(answer || '⏱️ No response yet — try again in a moment.', 'bot');
 }
 
 function addMsg(text, role) {
   const msgs = document.getElementById('chat-messages');
   const div = document.createElement('div');
-  div.className = 'msg ' + role;
-  div.innerHTML = text;
+  div.className = 'chat-msg ' + role;
+  div.innerHTML = text.replace(/\n/g, '<br>');
   msgs.appendChild(div);
   msgs.scrollTop = msgs.scrollHeight;
+  return div;
 }
 
-function processQuery(q) {
-  const ql = q.toLowerCase();
-
-  // Company detection
-  const companyMap = {
-    'capita': 'Capita', 'capgemini': 'Capgemini', 'deloitte': 'Deloitte',
-    'cgi': 'CGI', 'pa consulting': 'PA Consulting', 'pa': 'PA Consulting',
-    'pwc': 'PwC', 'atos': 'Atos/Eviden', 'eviden': 'Atos/Eviden',
-    'fujitsu': 'Fujitsu', 'ibm': 'IBM'
-  };
-  let matchedCompany = null;
-  for (const [key, val] of Object.entries(companyMap)) {
-    if (ql.includes(key)) { matchedCompany = val; break; }
-  }
-
-  // Intent detection
-  const isLatest = ql.includes('latest') || ql.includes('recent') || ql.includes('today') || ql.includes('update') || ql.includes('news');
-  const isWin = ql.includes('win') || ql.includes('contract') || ql.includes('award') || ql.includes('secure') || ql.includes('bid');
-  const isRisk = ql.includes('risk') || ql.includes('negative') || ql.includes('scandal') || ql.includes('fail') || ql.includes('worst') || ql.includes('concern');
-  const isSentiment = ql.includes('sentiment') || ql.includes('pulse') || ql.includes('mood') || ql.includes('how is') || ql.includes('performing');
-  const isCount = ql.includes('how many') || ql.includes('count') || ql.includes('total');
-  const isHorizon = ql.includes('horizon') || ql.includes('post office');
-  const isSummary = ql.includes('summary') || ql.includes('summarise') || ql.includes('summarize') || ql.includes('overview');
-  const isEditions = ql.includes('edition') || ql.includes('archive') || ql.includes('history') || ql.includes('past') || ql.includes('previous');
-
-  let pool = STORIES;
-
-  // Filter by horizon topic
-  if (isHorizon && !matchedCompany) {
-    pool = STORIES.filter(s => s.headline.toLowerCase().includes('horizon') || s.summary.toLowerCase().includes('horizon'));
-    if (pool.length === 0) return "I couldn't find any Horizon-specific stories in the archive.";
-    return formatStories(pool.slice(0, 4), 'Horizon / Post Office stories');
-  }
-
-  // Filter by company
-  if (matchedCompany) {
-    let filtered = STORIES.filter(s => s.company === matchedCompany);
-    if (filtered.length === 0) return `I don't have any stories for ${matchedCompany} in the archive yet.`;
-
-    if (isSentiment) {
-      const avg = filtered.reduce((a,b) => a + b.sentiment, 0) / filtered.length;
-      const sentLabel = avg >= 0.5 ? '🟢 Positive' : avg >= 0.1 ? '🟡 Neutral+' : avg >= -0.1 ? '⚪ Neutral' : avg >= -0.5 ? '🟠 Caution' : '🔴 Negative';
-      return `<b>${matchedCompany} sentiment</b><br>Average across ${filtered.length} stories: <b>${sentLabel}</b> (${avg >= 0 ? '+' : ''}${avg.toFixed(2)})`;
-    }
-
-    if (isWin) {
-      filtered = filtered.filter(s => s.sentiment > 0.3);
-      if (filtered.length === 0) return `No clear contract wins found for ${matchedCompany} in the archive.`;
-      return formatStories(filtered.slice(0, 4), `${matchedCompany} contract wins`);
-    }
-
-    if (isRisk) {
-      filtered = filtered.filter(s => s.sentiment < -0.3);
-      if (filtered.length === 0) return `No significant risk stories found for ${matchedCompany}.`;
-      return formatStories(filtered.slice(0, 4), `${matchedCompany} risks & concerns`);
-    }
-
-    if (isCount) {
-      return `There are <b>${filtered.length} stories</b> for ${matchedCompany} across ${[...new Set(filtered.map(s=>s.date))].length} editions in the archive.`;
-    }
-
-    // Default: latest stories for company
-    return formatStories(filtered.slice(0, 4), `Latest on ${matchedCompany}`);
-  }
-
-  // Global intents
-  if (isWin) {
-    const wins = STORIES.filter(s => s.sentiment > 0.5).slice(0, 5);
-    return formatStories(wins, 'Top contract wins across all companies');
-  }
-
-  if (isRisk) {
-    const risks = STORIES.filter(s => s.sentiment < -0.5).sort((a,b) => a.sentiment - b.sentiment).slice(0, 5);
-    return formatStories(risks, 'Biggest risks & concerns');
-  }
-
-  if (isEditions) {
-    const dates = [...new Set(STORIES.map(s => s.date))].sort().reverse();
-    return `<b>Archive: ${dates.length} editions</b><br>${dates.map(d => {
-      const count = STORIES.filter(s => s.date === d).length;
-      const dt = new Date(d + 'T00:00:00');
-      return dt.toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'}) + ' — ' + count + ' stories';
-    }).join('<br>')}`; 
-  }
-
-  if (isCount) {
-    return `The archive contains <b>${STORIES.length} stories</b> across <b>${[...new Set(STORIES.map(s=>s.date))].length} editions</b> and <b>9 companies</b>.`;
-  }
-
-  if (isSummary || ql.includes('what') && ql.includes('today')) {
-    const today = STORIES[0]?.date;
-    const todayStories = STORIES.filter(s => s.date === today);
-    if (todayStories.length === 0) return "No stories found for the latest edition.";
-    return formatStories(todayStories, 'Latest edition summary');
-  }
-
-  // Keyword search fallback
-  const keywords = ql.split(/\s+/).filter(w => w.length > 3);
-  const matches = STORIES.filter(s => {
-    const text = (s.headline + ' ' + s.summary).toLowerCase();
-    return keywords.some(k => text.includes(k));
-  });
-  if (matches.length > 0) {
-    return formatStories(matches.slice(0, 4), `Stories matching "${q}"`);
-  }
-
-  return `I couldn't find stories matching "<b>${q}</b>". Try asking about a specific company (Capita, Deloitte, CGI...), contract wins, risks, or type "summary" for the latest edition.`;
-}
-
-function formatStories(stories, label) {
-  if (stories.length === 0) return 'No stories found.';
-  const items = stories.map(s => {
-    const sent = s.sentiment >= 0.1 ? '🟢' : s.sentiment <= -0.1 ? '🔴' : '🔵';
-    const dt = new Date(s.date + 'T00:00:00');
-    const dateStr = dt.toLocaleDateString('en-GB', {day:'numeric', month:'short'});
-    return `${sent} <b>${s.company}</b> · ${dateStr}<br><a href="${s.url}" target="_blank">${s.headline}</a>`;
-  }).join('<br><br>');
-  return `<b>${label}</b><br><br>${items}`;
-}
 </script>
 </body>
 </html>
