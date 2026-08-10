@@ -4,781 +4,434 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>UKI PS Watchtower</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --navy: #1e3a5f;
-    --blue: #1d4ed8;
-    --bg: #f5f7fa;
-    --white: #ffffff;
-    --border: #e2e8f0;
-    --text: #1e293b;
-    --muted: #64748b;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); }
-  
-  /* Header */
-  header { background: var(--navy); color: white; padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; }
-  .header-title { font-family: 'DM Serif Display', serif; font-size: 1.5rem; }
-  .header-meta { display: flex; gap: 1.5rem; font-size: 0.8rem; opacity: 0.8; }
-  .header-stat { text-align: center; }
-  .header-stat-num { font-size: 1.2rem; font-weight: 600; display: block; }
-  
-  /* Layout */
-  .layout { display: flex; min-height: calc(100vh - 60px); }
-  
-  /* Sidebar */
-  .sidebar { width: 220px; min-width: 220px; background: var(--white); border-right: 1px solid var(--border); overflow-y: auto; padding: 1rem 0; }
-  .sidebar h4 { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); padding: 0 1rem 0.5rem; }
-  .archive-list { list-style: none; }
-  .archive-item { display: flex; justify-content: space-between; align-items: center; padding: 0.45rem 1rem; cursor: pointer; font-size: 0.82rem; color: var(--muted); border-left: 3px solid transparent; }
-  .archive-item:hover, .archive-item.active { background: #eff6ff; color: var(--blue); border-left-color: var(--blue); font-weight: 500; }
-  .badge { background: #e2e8f0; color: var(--muted); font-size: 0.7rem; border-radius: 10px; padding: 1px 7px; }
-  .archive-item.active .badge { background: #dbeafe; color: var(--blue); }
-  
-  /* Centre */
-  .centre { flex: 1; padding: 1.5rem; overflow-y: auto; max-height: calc(100vh - 60px); }
-  .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.25rem; }
-  .chip { padding: 0.3rem 0.8rem; border-radius: 20px; border: 1px solid var(--border); background: var(--white); font-size: 0.78rem; cursor: pointer; color: var(--muted); transition: all 0.15s; }
-  .chip:hover { border-color: var(--chip-color, var(--blue)); color: var(--chip-color, var(--blue)); }
-  .chip.active { background: var(--chip-color, var(--blue)); color: white; border-color: var(--chip-color, var(--blue)); }
-  .cards { display: flex; flex-direction: column; gap: 1rem; }
-  .card { background: var(--white); border-radius: 8px; padding: 1.1rem 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid var(--border); transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s; }
-  .card:hover { transform: translateY(-2px); border-color: var(--blue); box-shadow: 0 4px 12px rgba(29,78,216,0.1); }
-  .card-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
-  .company-tag { font-size: 0.7rem; font-weight: 600; color: white; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.04em; }
-  .card-date { font-size: 0.75rem; color: var(--muted); margin-left: auto; }
-  .sentiment-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  .card-headline { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.4rem; line-height: 1.4; }
-  .card-headline a { color: var(--text); text-decoration: none; }
-  .card-headline a:hover { color: var(--blue); }
-  .card-summary { font-size: 0.83rem; color: var(--muted); line-height: 1.5; }
-  .no-results { text-align: center; color: var(--muted); padding: 3rem 1rem; }
-  
-  /* Right panel */
-  .right-panel { width: 240px; min-width: 240px; background: var(--white); border-left: 1px solid var(--border); padding: 1rem; overflow-y: auto; }
-  .right-panel h4 { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.75rem; }
-  .sentiment-row { margin-bottom: 0.75rem; }
-  .sentiment-company { font-size: 0.78rem; font-weight: 500; margin-bottom: 0.25rem; }
-  .sentiment-bar-wrap { background: #f1f5f9; border-radius: 4px; height: 6px; width: 100%; margin-bottom: 0.2rem; }
-  .sentiment-bar { height: 6px; border-radius: 4px; transition: width 0.3s; }
-  .sentiment-label { font-size: 0.7rem; color: var(--muted); }
-  .sentiment-legend { border-top: 1px solid var(--border); padding-top: 0.75rem; margin-top: 0.5rem; font-size: 0.7rem; color: var(--muted); }
-  .sentiment-legend div { margin-bottom: 0.2rem; }
-  
-  /* Chat */
-  .chat-btn { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--navy); color: white; border: none; border-radius: 50px; padding: 0.7rem 1.2rem; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 999; transition: transform 0.2s; display: flex; align-items: center; gap: 0.4rem; }
-  .chat-btn:hover { transform: scale(1.05); }
-  .chat-window { position: fixed; bottom: 5rem; right: 1.5rem; width: 340px; background: var(--white); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.15); z-index: 1000; display: none; flex-direction: column; max-height: 480px; border: 1px solid var(--border); }
-  .chat-window.open { display: flex; }
-  .chat-head { background: var(--navy); color: white; padding: 0.75rem 1rem; border-radius: 12px 12px 0 0; display: flex; align-items: center; gap: 0.5rem; }
-  .chat-head-avatar { width: 28px; height: 28px; border-radius: 50%; background: #3b82f6; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
-  .chat-head-name { font-weight: 600; font-size: 0.85rem; }
-  .chat-head-sub { font-size: 0.7rem; opacity: 0.75; }
-  .chat-messages { flex: 1; overflow-y: auto; padding: 0.75rem; display: flex; flex-direction: column; gap: 0.6rem; }
-  .chat-msg { max-width: 85%; padding: 0.5rem 0.75rem; border-radius: 10px; font-size: 0.82rem; line-height: 1.45; }
-  .chat-msg.bot { background: #f1f5f9; color: var(--text); align-self: flex-start; }
-  .chat-msg.user { background: var(--blue); color: white; align-self: flex-end; }
-  .chat-suggestions { display: flex; flex-wrap: wrap; gap: 0.3rem; padding: 0 0.75rem 0.5rem; }
-  .chat-suggestion { background: #eff6ff; color: var(--blue); border: 1px solid #bfdbfe; border-radius: 15px; padding: 0.25rem 0.65rem; font-size: 0.73rem; cursor: pointer; }
-  .chat-suggestion:hover { background: #dbeafe; }
-  .chat-input-row { display: flex; padding: 0.6rem 0.75rem; border-top: 1px solid var(--border); gap: 0.4rem; }
-  .chat-input { flex: 1; border: 1px solid var(--border); border-radius: 20px; padding: 0.4rem 0.8rem; font-size: 0.82rem; outline: none; font-family: inherit; }
-  .chat-input:focus { border-color: var(--blue); }
-  .chat-send { background: var(--blue); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; }
-  
-  @media (max-width: 900px) {
-    .sidebar, .right-panel { display: none; }
-    .chat-window { width: calc(100vw - 3rem); right: 1.5rem; }
-  }
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#f5f7fa;color:#1e293b;min-height:100vh}
+header{background:#1e3a5f;color:white;padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.header-title{font-family:'DM Serif Display',serif;font-size:1.5rem;letter-spacing:-.5px}
+.header-subtitle{font-size:.75rem;opacity:.7;margin-top:2px}
+.header-stats{display:flex;gap:1.5rem;font-size:.8rem;opacity:.85}
+.stat-item{text-align:center}.stat-num{font-weight:700;font-size:1.1rem;display:block}
+.layout{display:grid;grid-template-columns:220px 1fr 240px;gap:0;height:calc(100vh - 64px)}
+.sidebar{background:white;border-right:1px solid #e2e8f0;overflow-y:auto;padding:1rem 0}
+.sidebar h3{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#94a3b8;padding:.5rem 1rem;margin-bottom:.5rem}
+.archive-item{padding:.5rem 1rem;cursor:pointer;font-size:.8rem;color:#475569;display:flex;justify-content:space-between;align-items:center;transition:all .15s;border-left:3px solid transparent}
+.archive-item:hover{background:#f8fafc;color:#1e3a5f}
+.archive-item.active{background:#eff6ff;color:#1d4ed8;border-left-color:#1d4ed8;font-weight:600}
+.archive-item .count{background:#e2e8f0;color:#64748b;font-size:.7rem;padding:1px 6px;border-radius:10px;font-weight:600}
+.archive-item.active .count{background:#dbeafe;color:#1d4ed8}
+.main{overflow-y:auto;padding:1.5rem}
+.filters{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.25rem}
+.chip{padding:.35rem .85rem;border-radius:20px;border:2px solid #e2e8f0;background:white;cursor:pointer;font-size:.78rem;font-weight:500;color:#64748b;transition:all .15s}
+.chip:hover{background:#f8fafc;border-color:#94a3b8}
+.chip.active{background:#1d4ed8;border-color:#1d4ed8;color:white}
+.cards{display:grid;gap:1rem}
+.card{background:white;border-radius:10px;padding:1.25rem;box-shadow:0 1px 3px rgba(0,0,0,.08);border:1px solid #e8edf3;transition:all .2s;cursor:default}
+.card:hover{box-shadow:0 4px 12px rgba(0,0,0,.12);border-color:#93c5fd;transform:translateY(-1px)}
+.card-meta{display:flex;align-items:center;gap:.6rem;margin-bottom:.7rem;flex-wrap:wrap}
+.company-tag{font-size:.72rem;font-weight:700;padding:.25rem .6rem;border-radius:4px;color:white;text-transform:uppercase;letter-spacing:.05em}
+.date-tag{font-size:.72rem;color:#94a3b8;font-weight:500}
+.sentiment-dot{width:8px;height:8px;border-radius:50%;margin-left:auto;flex-shrink:0}
+.card h3{font-size:.95rem;font-weight:600;color:#1e293b;margin-bottom:.6rem;line-height:1.4}
+.card h3 a{color:inherit;text-decoration:none}
+.card h3 a:hover{color:#1d4ed8;text-decoration:underline}
+.card p{font-size:.83rem;color:#475569;line-height:1.6}
+.no-results{text-align:center;padding:3rem;color:#94a3b8;font-size:.95rem}
+.right-panel{background:white;border-left:1px solid #e2e8f0;overflow-y:auto;padding:1.25rem}
+.panel-title{font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#94a3b8;margin-bottom:1rem}
+.pulse-row{margin-bottom:1rem}
+.pulse-company{font-size:.78rem;font-weight:600;color:#374151;margin-bottom:.3rem}
+.pulse-bar-container{height:6px;background:#f1f5f9;border-radius:3px;margin-bottom:.25rem;position:relative}
+.pulse-bar-center{position:absolute;left:50%;top:0;height:100%;width:1px;background:#94a3b8}
+.pulse-bar{height:100%;border-radius:3px;position:absolute;top:0;transition:width .3s}
+.pulse-label{font-size:.72rem;color:#6b7280;font-weight:500}
+.pulse-legend{margin-top:1.5rem;padding-top:1rem;border-top:1px solid #e2e8f0;font-size:.7rem;color:#9ca3af;line-height:1.8}
+/* Chat */
+#chat-btn{position:fixed;bottom:1.5rem;right:1.5rem;width:52px;height:52px;border-radius:50%;background:#1e3a5f;color:white;border:none;cursor:pointer;font-size:1.4rem;box-shadow:0 4px 12px rgba(0,0,0,.3);z-index:200;transition:transform .2s}
+#chat-btn:hover{transform:scale(1.1)}
+#chat-window{position:fixed;bottom:5rem;right:1.5rem;width:340px;height:480px;background:white;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.2);display:none;flex-direction:column;z-index:200;overflow:hidden;border:1px solid #e2e8f0}
+#chat-window.open{display:flex}
+.chat-header{background:#1e3a5f;color:white;padding:.8rem 1rem;display:flex;align-items:center;gap:.6rem}
+.chat-avatar{width:32px;height:32px;border-radius:50%;background:#2563eb;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:700;flex-shrink:0}
+.chat-title-block{flex:1}.chat-title{font-weight:600;font-size:.85rem}
+.chat-subtitle{font-size:.7rem;opacity:.7}
+#close-chat{background:none;border:none;color:white;cursor:pointer;font-size:1.2rem;opacity:.7;padding:0 4px}
+#close-chat:hover{opacity:1}
+#messages{flex:1;overflow-y:auto;padding:.8rem;display:flex;flex-direction:column;gap:.5rem}
+.msg{max-width:88%;padding:.55rem .8rem;border-radius:12px;font-size:.82rem;line-height:1.5}
+.msg.bot{background:#f1f5f9;color:#1e293b;align-self:flex-start;border-bottom-left-radius:4px}
+.msg.user{background:#1d4ed8;color:white;align-self:flex-end;border-bottom-right-radius:4px}
+.suggestions{padding:.6rem;display:flex;flex-wrap:wrap;gap:.4rem;border-top:1px solid #f1f5f9}
+.sugg-chip{padding:.3rem .7rem;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;border-radius:12px;font-size:.75rem;cursor:pointer;transition:all .15s}
+.sugg-chip:hover{background:#1d4ed8;color:white}
+.chat-input-row{display:flex;padding:.7rem;gap:.5rem;border-top:1px solid #e2e8f0}
+#chat-input{flex:1;border:1px solid #e2e8f0;border-radius:8px;padding:.45rem .7rem;font-size:.82rem;outline:none;font-family:inherit}
+#chat-input:focus{border-color:#93c5fd}
+#send-btn{background:#1d4ed8;color:white;border:none;border-radius:8px;padding:.45rem .8rem;cursor:pointer;font-size:.85rem;font-weight:600;transition:background .15s}
+#send-btn:hover{background:#1e40af}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.sidebar,.right-panel{display:none}}
 </style>
 </head>
 <body>
 <header>
   <div>
     <div class="header-title">📡 UKI PS Watchtower</div>
-    <div style="font-size:0.75rem;opacity:0.7;margin-top:0.2rem">UK & Ireland Public Sector Intelligence</div>
+    <div class="header-subtitle">UK & Ireland Public Sector Intelligence</div>
   </div>
-  <div class="header-meta">
-    <div class="header-stat"><span class="header-stat-num">44</span>stories</div>
-    <div class="header-stat"><span class="header-stat-num">24</span>editions</div>
-    <div class="header-stat"><span class="header-stat-num">9</span>companies</div>
-    <div class="header-stat"><span class="header-stat-num">7 Aug 2026</span>updated</div>
+  <div class="header-stats">
+    <div class="stat-item"><span class="stat-num">104</span>Stories</div>
+    <div class="stat-item"><span class="stat-num">34</span>Editions</div>
+    <div class="stat-item"><span class="stat-num">9</span>Companies</div>
+    <div class="stat-item"><span class="stat-num">2026-08-07</span>Updated</div>
   </div>
 </header>
 <div class="layout">
-  <nav class="sidebar">
-    <h4>Archive</h4>
-    <ul class="archive-list">
-<li class="archive-item active" data-filter-date="all" onclick="filterDate(this)"><span>All editions</span><span class="badge">44</span></li>
-<li class="archive-item" data-filter-date="2026-08-07" onclick="filterDate(this)"><span>2026-08-07</span><span class="badge">2</span></li>
-<li class="archive-item" data-filter-date="2026-08-06" onclick="filterDate(this)"><span>2026-08-06</span><span class="badge">1</span></li>
-<li class="archive-item" data-filter-date="2026-08-05" onclick="filterDate(this)"><span>2026-08-05</span><span class="badge">2</span></li>
-<li class="archive-item" data-filter-date="2026-08-04" onclick="filterDate(this)"><span>2026-08-04</span><span class="badge">3</span></li>
-<li class="archive-item" data-filter-date="2026-08-03" onclick="filterDate(this)"><span>2026-08-03</span><span class="badge">2</span></li>
-<li class="archive-item" data-filter-date="2026-07-31" onclick="filterDate(this)"><span>2026-07-31</span><span class="badge">3</span></li>
-<li class="archive-item" data-filter-date="2026-07-30" onclick="filterDate(this)"><span>2026-07-30</span><span class="badge">4</span></li>
-<li class="archive-item" data-filter-date="2026-07-29" onclick="filterDate(this)"><span>2026-07-29</span><span class="badge">1</span></li>
-<li class="archive-item" data-filter-date="2026-07-28" onclick="filterDate(this)"><span>2026-07-28</span><span class="badge">1</span></li>
-<li class="archive-item" data-filter-date="2026-07-27" onclick="filterDate(this)"><span>2026-07-27</span><span class="badge">1</span></li>
-<li class="archive-item" data-filter-date="2026-07-26" onclick="filterDate(this)"><span>2026-07-26</span><span class="badge">1</span></li>
-<li class="archive-item" data-filter-date="2026-07-24" onclick="filterDate(this)"><span>2026-07-24</span><span class="badge">1</span></li>
-<li class="archive-item" data-filter-date="2026-07-23" onclick="filterDate(this)"><span>2026-07-23</span><span class="badge">4</span></li>
-<li class="archive-item" data-filter-date="2026-07-22" onclick="filterDate(this)"><span>2026-07-22</span><span class="badge">2</span></li>
-<li class="archive-item" data-filter-date="2026-07-21" onclick="filterDate(this)"><span>2026-07-21</span><span class="badge">2</span></li>
-<li class="archive-item" data-filter-date="2026-07-17" onclick="filterDate(this)"><span>2026-07-17</span><span class="badge">2</span></li>
-<li class="archive-item" data-filter-date="2026-07-15" onclick="filterDate(this)"><span>2026-07-15</span><span class="badge">2</span></li>
-<li class="archive-item" data-filter-date="2026-07-14" onclick="filterDate(this)"><span>2026-07-14</span><span class="badge">3</span></li>
-<li class="archive-item" data-filter-date="2026-07-13" onclick="filterDate(this)"><span>2026-07-13</span><span class="badge">1</span></li>
-<li class="archive-item" data-filter-date="2026-07-10" onclick="filterDate(this)"><span>2026-07-10</span><span class="badge">1</span></li>
-<li class="archive-item" data-filter-date="2026-07-09" onclick="filterDate(this)"><span>2026-07-09</span><span class="badge">1</span></li>
-<li class="archive-item" data-filter-date="2026-07-08" onclick="filterDate(this)"><span>2026-07-08</span><span class="badge">1</span></li>
-<li class="archive-item" data-filter-date="2026-07-02" onclick="filterDate(this)"><span>2026-07-02</span><span class="badge">2</span></li>
-<li class="archive-item" data-filter-date="2026-07-01" onclick="filterDate(this)"><span>2026-07-01</span><span class="badge">1</span></li>
-
-    </ul>
-  </nav>
-  <main class="centre">
-    <div class="chips">
-<button class="chip active" data-filter-company="all" onclick="filterCompany(this)">All</button>
-<button class="chip" data-filter-company="atos / eviden" onclick="filterCompany(this)" style="--chip-color:#10b981">Atos / Eviden</button>
-<button class="chip" data-filter-company="atos/eviden" onclick="filterCompany(this)" style="--chip-color:#10b981">Atos/Eviden</button>
-<button class="chip" data-filter-company="cgi" onclick="filterCompany(this)" style="--chip-color:#7c3aed">CGI</button>
-<button class="chip" data-filter-company="capgemini" onclick="filterCompany(this)" style="--chip-color:#0891b2">Capgemini</button>
-<button class="chip" data-filter-company="capita" onclick="filterCompany(this)" style="--chip-color:#dc2626">Capita</button>
-<button class="chip" data-filter-company="deloitte" onclick="filterCompany(this)" style="--chip-color:#059669">Deloitte</button>
-<button class="chip" data-filter-company="fujitsu" onclick="filterCompany(this)" style="--chip-color:#f43f5e">Fujitsu</button>
-<button class="chip" data-filter-company="ibm" onclick="filterCompany(this)" style="--chip-color:#1d4ed8">IBM</button>
-<button class="chip" data-filter-company="pa consulting" onclick="filterCompany(this)" style="--chip-color:#0ea5e9">PA Consulting</button>
-
-    </div>
-    <div class="cards" id="cards-container">
-
-    <div class="card" data-date="2026-08-07" data-company="capita">
-      <div class="card-header">
-        <span class="company-tag" style="background:#dc2626">Capita</span>
-        <span class="card-date">2026-08-07</span>
-        <span class="sentiment-dot" style="background:#dc2626" title="Sentiment: -0.70"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.computerweekly.com/news/366648014/Capita-CEO-receives-scathing-rebuttal-from-employee-over-botched-contract" target="_blank" rel="noopener">Capita CEO receives scathing rebuttal from employee over botched Civil Service Pension contract</a></h3>
-      <p class="card-summary">A Capita staff member publicly challenged CEO Adolfo Hernandez after he claimed the 'right people, processes and technology' were now in place to fix the £239m Civil Service Pension Scheme (CSPS) administration. The employee described service as 'abysmal', revealed members had died waiting for resolution, and noted the backlog has grown by 40,000 cases since the December 2025 go-live. Staff report missing line managers, manual workflows, and no visible technology improvements.</p>
-    </div>
-    <div class="card" data-date="2026-08-07" data-company="capita">
-      <div class="card-header">
-        <span class="company-tag" style="background:#dc2626">Capita</span>
-        <span class="card-date">2026-08-07</span>
-        <span class="sentiment-dot" style="background:#ea580c" title="Sentiment: -0.40"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://diginomica.com/failure-has-never-been-barrier-services-firms-winning-uk-public-sector-business-can-capita-prove" target="_blank" rel="noopener">Analysis: Can Capita recover UK public sector standing despite Civil Service Pension crisis?</a></h3>
-      <p class="card-summary">Diginomica analysis asks whether Capita — the UK's largest BPO and professional services firm — can restore its government credibility following the highly-publicised Civil Service Pension Scheme failure. CEO Hernandez acknowledged serious service shortfalls but insisted the firm is committed to resolution; critics counter that history suggests accountability rarely prevents re-award of public sector contracts in the UK.</p>
-    </div>
-    <div class="card" data-date="2026-08-06" data-company="pa consulting">
-      <div class="card-header">
-        <span class="company-tag" style="background:#0ea5e9">PA Consulting</span>
-        <span class="card-date">2026-08-06</span>
-        <span class="sentiment-dot" style="background:#ca8a04" title="Sentiment: 0.10"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.techmarketview.com/ukhotviews/archive/2026/08/05/a-slow-q3-for-pa" target="_blank" rel="noopener">PA Consulting Q3 Revenue Slips but UK Public Sector Backlog Surges 9.3%</a></h3>
-      <p class="card-summary">PA Consulting's Q3 FY2026 results show a modest revenue dip year-on-year, but operating profit margin improved 80 basis points to 22.4% and its order backlog climbed 9.3% to $459m. Two Home Office contracts worth a combined £230m, signed earlier in 2026, continue to anchor the firm's strong public sector pipeline.</p>
-    </div>
-    <div class="card" data-date="2026-08-05" data-company="capita">
-      <div class="card-header">
-        <span class="company-tag" style="background:#dc2626">Capita</span>
-        <span class="card-date">2026-08-05</span>
-        <span class="sentiment-dot" style="background:#ea580c" title="Sentiment: -0.30"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.marketbeat.com/instant-alerts/capita-h1-earnings-call-highlights-2026-08-04/" target="_blank" rel="noopener">Capita H1 2026 Results: Revenue Up 1.6% But Profits Squeezed as Civil Service Pension Crisis Deepens</a></h3>
-      <p class="card-summary">Capita reported H1 2026 revenue of £906m (+1.6%) but adjusted operating profit fell 32% to £32m, weighed down by Civil Service Pension Scheme (CSPS) remediation costs. The company secured a £425m TfL road user charging extension and grew its order book to £4bn.</p>
-    </div>
-    <div class="card" data-date="2026-08-05" data-company="deloitte">
-      <div class="card-header">
-        <span class="company-tag" style="background:#059669">Deloitte</span>
-        <span class="card-date">2026-08-05</span>
-        <span class="sentiment-dot" style="background:#16a34a" title="Sentiment: 0.50"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.deloitte.com/uk/en/about/press-room/deloitte-acquires-cost-verification-business-the-orange-partnership.html" target="_blank" rel="noopener">Deloitte Acquires UK Cost Verification Firm The Orange Partnership to Bolster Public Sector Capital Advisory</a></h3>
-      <p class="card-summary">Deloitte UK has acquired The Orange Partnership, a Midlands-based chartered accountancy practice specialising in independent cost verification and open-book contract assurance for major capital projects, strengthening its Capital Projects Advisory capability.</p>
-    </div>
-    <div class="card" data-date="2026-08-04" data-company="capita">
-      <div class="card-header">
-        <span class="company-tag" style="background:#dc2626">Capita</span>
-        <span class="card-date">2026-08-04</span>
-        <span class="sentiment-dot" style="background:#16a34a" title="Sentiment: 0.85"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.capita.com/news-and-insights/news/2026/capita-secures-five-year-extension-transport-for-london" target="_blank" rel="noopener">Capita secures five-year extension to TfL Road User Charging contracts</a></h3>
-      <p class="card-summary">Capita has secured a five-year extension to its two Transport for London Road User Charging contracts, covering operations from October 2026 to September 2031. The combined contract value is approximately £424.6m.</p>
-    </div>
-    <div class="card" data-date="2026-08-04" data-company="fujitsu">
-      <div class="card-header">
-        <span class="company-tag" style="background:#f43f5e">Fujitsu</span>
-        <span class="card-date">2026-08-04</span>
-        <span class="sentiment-dot" style="background:#dc2626" title="Sentiment: -0.55"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.computerweekly.com/news/366646721/MPs-demand-answers-on-Fujitsus-inclusion-in-lucrative-frameworks" target="_blank" rel="noopener">MPs demand answers on Fujitsu's inclusion in £54bn government procurement frameworks</a></h3>
-      <p class="card-summary">The Business and Trade Select Committee has written to the Secretary of State demanding assurances that Fujitsu's self-imposed ban on bidding for new public sector customers will be honoured after the supplier was confirmed on four government frameworks worth over £54bn.</p>
-    </div>
-    <div class="card" data-date="2026-08-04" data-company="pa consulting">
-      <div class="card-header">
-        <span class="company-tag" style="background:#0ea5e9">PA Consulting</span>
-        <span class="card-date">2026-08-04</span>
-        <span class="sentiment-dot" style="background:#ca8a04" title="Sentiment: 0.45"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.ciht.org.uk/news/new-dft-research-provides-framework-for-appraising-transport-resilience/" target="_blank" rel="noopener">PA Consulting delivers DfT transport resilience appraisal framework</a></h3>
-      <p class="card-summary">The Department for Transport has published a new research report, developed by PA Consulting, introducing a consistent framework for appraising resilience in transport schemes.</p>
-    </div>
-    <div class="card" data-date="2026-08-03" data-company="atos / eviden">
-      <div class="card-header">
-        <span class="company-tag" style="background:#10b981">Atos / Eviden</span>
-        <span class="card-date">2026-08-03</span>
-        <span class="sentiment-dot" style="background:#ca8a04" title="Sentiment: 0.20"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.techmarketview.com/ukhotviews/archive/2026/08/03/tmve26-Atos-joins-as-premier-sponsor" target="_blank" rel="noopener">Atos Joins TechMarketView '26 as Premier Sponsor, Spotlighting UK Public Sector AI</a></h3>
-      <p class="card-summary">Atos UK&I has confirmed its position as premier sponsor of An Evening with TechMarketView '26, underscoring its strategic priorities of digital sovereignty, mission-critical AI, and embedded cybersecurity.</p>
-    </div>
-    <div class="card" data-date="2026-08-03" data-company="capita">
-      <div class="card-header">
-        <span class="company-tag" style="background:#dc2626">Capita</span>
-        <span class="card-date">2026-08-03</span>
-        <span class="sentiment-dot" style="background:#16a34a" title="Sentiment: 0.50"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.tendergazette.com/news/tender-gazette-supplier-standings-2026-top-20-year-to-date" target="_blank" rel="noopener">Capita Ranks Third in UK Public Sector Contract Awards for 2026 with £1.9bn Secured</a></h3>
-      <p class="card-summary">Capita Business Services Ltd holds third place in the UK public sector supplier standings for 2026 year-to-date, with £1.9bn in contract award value across 6 awards through Q1 and Q2.</p>
-    </div>
-    <div class="card" data-date="2026-07-31" data-company="atos / eviden">
-      <div class="card-header">
-        <span class="company-tag" style="background:#10b981">Atos / Eviden</span>
-        <span class="card-date">2026-07-31</span>
-        <span class="sentiment-dot" style="background:#16a34a" title="Sentiment: 0.65"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.techmarketview.com/news/archive/2026/07/30/ukhotviewsextra-atos-uki-three-quarters-of-growth-and-counting" target="_blank" rel="noopener">Atos UK&I Delivers Third Consecutive Quarter of Growth with 7.1% Organic Revenue Uplift</a></h3>
-      <p class="card-summary">Atos UK&Ireland continued its positive momentum, reporting a third consecutive quarter of organic revenue growth at 7.1%, backed by a strong 10.4% operating margin. H1 2026 revenue for the UK&I region reached €606m.</p>
-    </div>
-    <div class="card" data-date="2026-07-31" data-company="capgemini">
-      <div class="card-header">
-        <span class="company-tag" style="background:#0891b2">Capgemini</span>
-        <span class="card-date">2026-07-31</span>
-        <span class="sentiment-dot" style="background:#16a34a" title="Sentiment: 0.70"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.techmarketview.com/ukhotviews/archive/2026/07/30/capgemini-uk-up-21-in-h1" target="_blank" rel="noopener">Capgemini UK&I Up 21% in H1 FY2026, Backed by £500m HMRC Contract Win</a></h3>
-      <p class="card-summary">Capgemini UK&Ireland posted 21.1% revenue growth in H1 FY2026, driven by strong public sector demand and acquisitions. The period included the landmark £500m HMRC Contact Centre as a Service contract win.</p>
-    </div>
-    <div class="card" data-date="2026-07-31" data-company="fujitsu">
-      <div class="card-header">
-        <span class="company-tag" style="background:#f43f5e">Fujitsu</span>
-        <span class="card-date">2026-07-31</span>
-        <span class="sentiment-dot" style="background:#dc2626" title="Sentiment: -0.70"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.computerweekly.com/news/366646732/Subpostmasters-anxious-over-Horizon-replacement-as-it-is-delayed-yet-again" target="_blank" rel="noopener">Post Office Horizon Replacement Delayed a Sixth Time as Subpostmasters Accuse Fujitsu of Checking Out</a></h3>
-      <p class="card-summary">The Post Office has extended the standstill period on the Horizon replacement contract—now delayed for a sixth time—to 21 August. Subpostmasters report a marked deterioration in Horizon performance, accusing Fujitsu of taking its foot off the gas.</p>
-    </div>
-    <div class="card" data-date="2026-07-30" data-company="atos/eviden">
-      <div class="card-header">
-        <span class="company-tag" style="background:#10b981">Atos/Eviden</span>
-        <span class="card-date">2026-07-30</span>
-        <span class="sentiment-dot" style="background:#16a34a" title="Sentiment: 0.75"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.globenewswire.com/news-release/2026/07/30/3335769/0/en/atos-group-h1-2026-results.html" target="_blank" rel="noopener">Atos UK & Ireland Posts 7.1% Revenue Growth in H1 2026</a></h3>
-      <p class="card-summary">Atos Group's UK & Ireland business delivered revenues of €606 million in H1 2026, up 7.1% organically year-on-year, with operating margin improved to 10.4%.</p>
-    </div>
-    <div class="card" data-date="2026-07-30" data-company="cgi">
-      <div class="card-header">
-        <span class="company-tag" style="background:#7c3aed">CGI</span>
-        <span class="card-date">2026-07-30</span>
-        <span class="sentiment-dot" style="background:#ca8a04" title="Sentiment: 0.35"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.techmarketview.com/news/archive/2026/07/29/ukhotviewsextra-cgi-q3-fy2026-uk-holds-up-as-growth-slows-across-the-group" target="_blank" rel="noopener">CGI UK Holds Steady in Q3 FY2026 with Five-Quarter Margin Uptrend</a></h3>
-      <p class="card-summary">CGI's UK and Australia segment delivered Q3 FY2026 revenue of CAN$585.1 million, up 2.5%, with EBIT margin rising to 16.1% from 13.7% a year ago — the fifth consecutive quarter of margin improvement.</p>
-    </div>
-    <div class="card" data-date="2026-07-30" data-company="capgemini">
-      <div class="card-header">
-        <span class="company-tag" style="background:#0891b2">Capgemini</span>
-        <span class="card-date">2026-07-30</span>
-        <span class="sentiment-dot" style="background:#16a34a" title="Sentiment: 0.80"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://finance.yahoo.com/markets/stocks/articles/capgemini-upgrades-2026-outlook.html" target="_blank" rel="noopener">Capgemini UK & Ireland Surges 21% as Group Upgrades Full-Year 2026 Outlook</a></h3>
-      <p class="card-summary">Capgemini reported H1 2026 group revenues of €12.1 billion (+8.8%), upgrading its full-year growth target. The UK & Ireland region was the standout performer, growing 21.1% at constant exchange rates.</p>
-    </div>
-    <div class="card" data-date="2026-07-30" data-company="pa consulting">
-      <div class="card-header">
-        <span class="company-tag" style="background:#0ea5e9">PA Consulting</span>
-        <span class="card-date">2026-07-30</span>
-        <span class="sentiment-dot" style="background:#ca8a04" title="Sentiment: 0.45"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.techmarketview.com/ukhotviews/archive/2026/07/29/google-dropped-from-dfes-ai-tutoring-pilot-replaced-by-pa-consulting" target="_blank" rel="noopener">PA Consulting Replaces Google on Government AI Tutoring Pilot for Disadvantaged Pupils</a></h3>
-      <p class="card-summary">PA Consulting Services has joined the Department for Education's AI Tutoring Pioneer Group after Google UK was removed. The contract slot, worth £360,000 including VAT, targets up to 450,000 disadvantaged pupils.</p>
-    </div>
-    <div class="card" data-date="2026-07-29" data-company="fujitsu">
-      <div class="card-header">
-        <span class="company-tag" style="background:#f43f5e">Fujitsu</span>
-        <span class="card-date">2026-07-29</span>
-        <span class="sentiment-dot" style="background:#dc2626" title="Sentiment: -0.70"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.computerweekly.com/news/366646332/UK-Public-dont-trust-Fujitsu-but-government-does" target="_blank" rel="noopener">UK Public Does Not Trust Fujitsu, But Government Continues to Award Contracts</a></h3>
-      <p class="card-summary">Despite 95% of respondents in a Daily Mail poll saying Fujitsu should be blacklisted after the Post Office Horizon scandal, the government has placed it on four major procurement frameworks worth over £54bn.</p>
-    </div>
-    <div class="card" data-date="2026-07-28" data-company="pa consulting">
-      <div class="card-header">
-        <span class="company-tag" style="background:#0ea5e9">PA Consulting</span>
-        <span class="card-date">2026-07-28</span>
-        <span class="sentiment-dot" style="background:#16a34a" title="Sentiment: 0.60"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://schoolsweek.co.uk/google-no-longer-helping-government-develop-ai-tutoring-tools-for-schools/" target="_blank" rel="noopener">PA Consulting Replaces Google as UK Government AI Tutoring Provider for Schools</a></h3>
-      <p class="card-summary">The UK Department for Education has added PA Consulting as a replacement provider for its AI tutoring pilot scheme targeting disadvantaged pupils.</p>
-    </div>
-    <div class="card" data-date="2026-07-27" data-company="fujitsu">
-      <div class="card-header">
-        <span class="company-tag" style="background:#f43f5e">Fujitsu</span>
-        <span class="card-date">2026-07-27</span>
-        <span class="sentiment-dot" style="background:#dc2626" title="Sentiment: -0.75"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://streamlinefeed.co.ke/news/fujitsu-secures-61-million-hmrc-contract-horizon-post-office-scandal-2026" target="_blank" rel="noopener">Fujitsu Secures £61 Million HMRC Contract Despite Lingering Horizon Post Office Scandal</a></h3>
-      <p class="card-summary">Fujitsu has secured a £61 million IT contract with HMRC, sparking political outrage as the firm continues to hold government contracts worth an estimated £500 million while contributing nothing to the £1.8 billion Post Office Horizon scandal compensation fund.</p>
-    </div>
-    <div class="card" data-date="2026-07-26" data-company="fujitsu">
-      <div class="card-header">
-        <span class="company-tag" style="background:#f43f5e">Fujitsu</span>
-        <span class="card-date">2026-07-26</span>
-        <span class="sentiment-dot" style="background:#dc2626" title="Sentiment: -0.80"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://labourhub.org.uk/2026/07/26/the-horizon-post-office-scandal-what-next/" target="_blank" rel="noopener">Horizon Post Office Scandal: Police Investigation Faces Funding Crisis as Final Report Delayed Again</a></h3>
-      <p class="card-summary">Operation Olympos, the police investigation into the Post Office Horizon scandal implicating Fujitsu, is warning of timeline slippage without urgent funding. The Public Inquiry final report may not be published until early 2027.</p>
-    </div>
-    <div class="card" data-date="2026-07-24" data-company="deloitte">
-      <div class="card-header">
-        <span class="company-tag" style="background:#059669">Deloitte</span>
-        <span class="card-date">2026-07-24</span>
-        <span class="sentiment-dot" style="background:#ca8a04" title="Sentiment: 0.40"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.instagram.com/reel/DbIelSliE5G/" target="_blank" rel="noopener">Deloitte Launches "Flying High" UK Aerospace & Defence Policy Paper at Farnborough</a></h3>
-      <p class="card-summary">Deloitte UK published a major policy paper at the Farnborough International Airshow calling for strategic government investment to build aerospace resilience and drive innovation.</p>
-    </div>
-    <div class="card" data-date="2026-07-23" data-company="atos/eviden">
-      <div class="card-header">
-        <span class="company-tag" style="background:#10b981">Atos/Eviden</span>
-        <span class="card-date">2026-07-23</span>
-        <span class="sentiment-dot" style="background:#ca8a04" title="Sentiment: 0.30"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.instagram.com/p/DbGrQ_AjI1L/" target="_blank" rel="noopener">Eviden Showcases UK Defence & Intelligence Capabilities at DCIIS 2026</a></h3>
-      <p class="card-summary">Eviden participated in DCIIS 2026 demonstrating security and digital capabilities to government and defence clients, with 56% of attendees initiating new business discussions.</p>
-    </div>
-    <div class="card" data-date="2026-07-23" data-company="cgi">
-      <div class="card-header">
-        <span class="company-tag" style="background:#7c3aed">CGI</span>
-        <span class="card-date">2026-07-23</span>
-        <span class="sentiment-dot" style="background:#ca8a04" title="Sentiment: 0.20"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.techuk.org/resource/sharing-to-succeed-from-targets-to-outcomes.html" target="_blank" rel="noopener">CGI Director Calls for Mandatory SME Participation in UK Government Contracts</a></h3>
-      <p class="card-summary">Sonya Anderson, CGI's Director of Central Government, called for SME inclusion to be mandated and measured in all government procurement from the outset.</p>
-    </div>
-    <div class="card" data-date="2026-07-23" data-company="capita">
-      <div class="card-header">
-        <span class="company-tag" style="background:#dc2626">Capita</span>
-        <span class="card-date">2026-07-23</span>
-        <span class="sentiment-dot" style="background:#dc2626" title="Sentiment: -0.80"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.aol.co.uk/articles/retired-uk-civil-servants-failed-050047000.html" target="_blank" rel="noopener">MPs Debate Capita Pension Crisis as Cabinet Office Confirms Insourcing Plan</a></h3>
-      <p class="card-summary">MPs raised urgent questions in Parliament about Capita's ongoing failure to administer the £239m Civil Service Pension Scheme, with the Cabinet Office confirming it is actively planning to bring the scheme back in-house.</p>
-    </div>
-    <div class="card" data-date="2026-07-23" data-company="ibm">
-      <div class="card-header">
-        <span class="company-tag" style="background:#1d4ed8">IBM</span>
-        <span class="card-date">2026-07-23</span>
-        <span class="sentiment-dot" style="background:#ca8a04" title="Sentiment: 0.20"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.techuk.org/resource/sharing-to-succeed-from-ccs-to-gca-what-has-really-happened-to-govts-commercial-function.html" target="_blank" rel="noopener">IBM Expert Analyses New Government Commercial Agency Impact on UK Tech Suppliers</a></h3>
-      <p class="card-summary">IBM's Giles Hartwright published a TechUK guest piece examining the transition from Crown Commercial Service (CCS) to the new Government Commercial Agency (GCA).</p>
-    </div>
-    <div class="card" data-date="2026-07-22" data-company="capita">
-      <div class="card-header">
-        <span class="company-tag" style="background:#dc2626">Capita</span>
-        <span class="card-date">2026-07-22</span>
-        <span class="sentiment-dot" style="background:#dc2626" title="Sentiment: -0.80"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.pcs.org.uk/news-events/news/pressure-mounting-government-pause-synergy-contract" target="_blank" rel="noopener">Pressure mounting on Government to pause Capita Synergy contract</a></h3>
-      <p class="card-summary">PCS union is calling for the Government to pause Capita's £370m Synergy contract serving over 250,000 civil servants' payroll and HR, citing poor track record.</p>
-    </div>
-    <div class="card" data-date="2026-07-22" data-company="ibm">
-      <div class="card-header">
-        <span class="company-tag" style="background:#1d4ed8">IBM</span>
-        <span class="card-date">2026-07-22</span>
-        <span class="sentiment-dot" style="background:#ea580c" title="Sentiment: -0.40"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.theregister.com/public-sector/2026/07/21/ukgovs-tech-department-gets-the-chop-after-two-years/5275573" target="_blank" rel="noopener">UK government scraps DSIT: Burnham signals sweeping end to outsourcing era</a></h3>
-      <p class="card-summary">New PM Andy Burnham is abolishing DSIT and promising to bring government IT contracts back in house — a direct threat to major public-sector IT suppliers including IBM, Capgemini, Deloitte, CGI, and others.</p>
-    </div>
-    <div class="card" data-date="2026-07-21" data-company="atos/eviden">
-      <div class="card-header">
-        <span class="company-tag" style="background:#10b981">Atos/Eviden</span>
-        <span class="card-date">2026-07-21</span>
-        <span class="sentiment-dot" style="background:#ea580c" title="Sentiment: -0.40"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://simplywall.st/stocks/us/software/nyse-dxc/dxc-technology/news/capita-fallout-puts-dxc-atos-uk-public-sector-exposure-in-th" target="_blank" rel="noopener">Capita pension fallout puts Atos UK public sector contracts under scrutiny</a></h3>
-      <p class="card-summary">The government's growing appetite for insourcing has drawn attention to Atos's own public sector exposure in the UK.</p>
-    </div>
-    <div class="card" data-date="2026-07-21" data-company="capita">
-      <div class="card-header">
-        <span class="company-tag" style="background:#dc2626">Capita</span>
-        <span class="card-date">2026-07-21</span>
-        <span class="sentiment-dot" style="background:#dc2626" title="Sentiment: -0.70"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.theguardian.com/business/2026/jul/20/retired-uk-civil-servants-failed-pension-outsourcing-government-capita" target="_blank" rel="noopener">Government admits Capita has failed civil service pension scheme, plans insourcing</a></h3>
-      <p class="card-summary">The UK government has admitted that outsourcing the civil service pension scheme to Capita was a failure, with Cabinet Office minister confirming active plans for insourcing.</p>
-    </div>
-    <div class="card" data-date="2026-07-17" data-company="capita">
-      <div class="card-header">
-        <span class="company-tag" style="background:#dc2626">Capita</span>
-        <span class="card-date">2026-07-17</span>
-        <span class="sentiment-dot" style="background:#dc2626" title="Sentiment: -0.75"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://schoolsweek.co.uk/ofsted-chair-to-lead-review-into-sats-marking-fiasco/" target="_blank" rel="noopener">Ofsted Chair to Lead Independent Review into Capita SATs Marking Fiasco</a></h3>
-      <p class="card-summary">The government launched an independent review into serious failings in Capita's management of the 2026 KS2 SATs marking process, with results delivered nine days late.</p>
-    </div>
-    <div class="card" data-date="2026-07-17" data-company="capita">
-      <div class="card-header">
-        <span class="company-tag" style="background:#dc2626">Capita</span>
-        <span class="card-date">2026-07-17</span>
-        <span class="sentiment-dot" style="background:#dc2626" title="Sentiment: -0.60"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.techmarketview.com/ukhotviews/archive/2026/07/16/pac-casts-doubt-over-government-shared-services" target="_blank" rel="noopener">PAC Warns £1.15bn Government Shared Services Programme at Risk, Questions Capita Suitability</a></h3>
-      <p class="card-summary">The Public Accounts Committee warned that the government's Shared Services strategy risks becoming a costly failure, explicitly questioning Capita's suitability to deliver a £370m HR and payroll contract.</p>
-    </div>
-    <div class="card" data-date="2026-07-15" data-company="capita">
-      <div class="card-header">
-        <span class="company-tag" style="background:#dc2626">Capita</span>
-        <span class="card-date">2026-07-15</span>
-        <span class="sentiment-dot" style="background:#16a34a" title="Sentiment: 0.65"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://uk.finance.yahoo.com/news/capita-wins-role-2bn-british-072603819.html" target="_blank" rel="noopener">Capita Wins Role in £2bn British Army Collective Training Programme</a></h3>
-      <p class="card-summary">Capita has been selected to join the Omnia Training consortium to deliver the British Army's new Collective Training System under a 15-year, £2 billion contract.</p>
-    </div>
-    <div class="card" data-date="2026-07-15" data-company="fujitsu">
-      <div class="card-header">
-        <span class="company-tag" style="background:#f43f5e">Fujitsu</span>
-        <span class="card-date">2026-07-15</span>
-        <span class="sentiment-dot" style="background:#ea580c" title="Sentiment: -0.35"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.gov.uk/government/publications/post-office-future-technology-portfolio-summary-business-case/summary-business-case" target="_blank" rel="noopener">UK Government Publishes £551m Plan to Exit Fujitsu Horizon Contract</a></h3>
-      <p class="card-summary">The UK Government has published the Post Office Future Technology Portfolio Summary Business Case — a £551.8 million programme to modernise and transition away from Fujitsu's Horizon system.</p>
-    </div>
-    <div class="card" data-date="2026-07-14" data-company="capita">
-      <div class="card-header">
-        <span class="company-tag" style="background:#dc2626">Capita</span>
-        <span class="card-date">2026-07-14</span>
-        <span class="sentiment-dot" style="background:#dc2626" title="Sentiment: -0.80"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.publictechnology.net/2026/07/13/business-and-industry/government-still-waiting-for-capita-technology-rectification-plan-in-whitehall-pensions-crisis/" target="_blank" rel="noopener">Government Still Waiting for Capita Technology Rectification Plan in Whitehall Pensions Crisis</a></h3>
-      <p class="card-summary">MPs warned that restoring the Civil Service Pension Scheme to normal service levels will take several more months, as Capita is expected to miss 16 of 21 KPIs.</p>
-    </div>
-    <div class="card" data-date="2026-07-14" data-company="deloitte">
-      <div class="card-header">
-        <span class="company-tag" style="background:#059669">Deloitte</span>
-        <span class="card-date">2026-07-14</span>
-        <span class="sentiment-dot" style="background:#dc2626" title="Sentiment: -0.60"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.irishexaminer.com/news/politics/arid-41877548.html" target="_blank" rel="noopener">Irish Government's €102.8m Deloitte Bill Branded 'Absolutely Shocking' by Opposition TDs</a></h3>
-      <p class="card-summary">Ireland's Department of Social Protection spent €102.8m on Deloitte consultancy and IT services between 2020 and 2025, prompting calls for an audit of all external firms.</p>
-    </div>
-    <div class="card" data-date="2026-07-14" data-company="fujitsu">
-      <div class="card-header">
-        <span class="company-tag" style="background:#f43f5e">Fujitsu</span>
-        <span class="card-date">2026-07-14</span>
-        <span class="sentiment-dot" style="background:#dc2626" title="Sentiment: -0.70"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://japannews.yomiuri.co.jp/culture/books-literature/20260713-337912/" target="_blank" rel="noopener">Fujitsu Has Not Provided Compensation Despite Moral Obligation Over Post Office Horizon Scandal</a></h3>
-      <p class="card-summary">A newly published book highlights that Fujitsu has apologised but still has not provided direct financial compensation to affected sub-postmasters, despite publicly acknowledging a moral obligation.</p>
-    </div>
-    <div class="card" data-date="2026-07-13" data-company="capita">
-      <div class="card-header">
-        <span class="company-tag" style="background:#dc2626">Capita</span>
-        <span class="card-date">2026-07-13</span>
-        <span class="sentiment-dot" style="background:#16a34a" title="Sentiment: 0.85"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.insidermedia.com/news/national/mod-awards-consortium-2bn-contract-for-ai-based-training-and-analytics" target="_blank" rel="noopener">MOD awards Omnia Training consortium £2bn contract for AI-based training and analytics</a></h3>
-      <p class="card-summary">The UK MoD awarded a £2 billion, 15-year contract to Omnia Training — a consortium including Capita — to deploy AI, advanced analytics and virtual environments to train up to 60,000 soldiers per year.</p>
-    </div>
-    <div class="card" data-date="2026-07-10" data-company="capita">
-      <div class="card-header">
-        <span class="company-tag" style="background:#dc2626">Capita</span>
-        <span class="card-date">2026-07-10</span>
-        <span class="sentiment-dot" style="background:#dc2626" title="Sentiment: -0.90"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.computerweekly.com/news/366645700/Capita-to-lose-money-on-pension-debacle-but-has-governments-private-parts-in-its-grip" target="_blank" rel="noopener">Capita to lose money on pension debacle but has government's private parts in its grip</a></h3>
-      <p class="card-summary">At a joint PAC/PACAC hearing, Capita's CEO admitted the AI-automation technology for the Civil Service Pension Scheme failed entirely, leaving the company set to make no money on its £239m contract.</p>
-    </div>
-    <div class="card" data-date="2026-07-09" data-company="cgi">
-      <div class="card-header">
-        <span class="company-tag" style="background:#7c3aed">CGI</span>
-        <span class="card-date">2026-07-09</span>
-        <span class="sentiment-dot" style="background:#16a34a" title="Sentiment: 0.70"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.techmarketview.com/ukhotviews/archive/2026/07/08/cgi-adds-geospatial-data-role-at-hm-land-registry" target="_blank" rel="noopener">CGI adds geospatial data role at HM Land Registry</a></h3>
-      <p class="card-summary">CGI has won HM Land Registry's Strategic Data Partner contract, worth up to £14.1m over five years starting 1 July 2026.</p>
-    </div>
-    <div class="card" data-date="2026-07-08" data-company="deloitte">
-      <div class="card-header">
-        <span class="company-tag" style="background:#059669">Deloitte</span>
-        <span class="card-date">2026-07-08</span>
-        <span class="sentiment-dot" style="background:#16a34a" title="Sentiment: 0.60"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.gov.uk/government/news/businesses-across-britain-sign-up-to-cyber-resilience-pledge-as-ministers-urge-firms-to-strengthen-cyber-defences" target="_blank" rel="noopener">UK Government Launches National Cyber Resilience Pledge; Deloitte Joins as Founding Signatory</a></h3>
-      <p class="card-summary">The UK government launched its National Cyber Resilience Pledge at 10 Downing Street, with Deloitte LLP joining as a founding signatory alongside M&S, Nationwide, and Microsoft UK.</p>
-    </div>
-    <div class="card" data-date="2026-07-02" data-company="capgemini">
-      <div class="card-header">
-        <span class="company-tag" style="background:#0891b2">Capgemini</span>
-        <span class="card-date">2026-07-02</span>
-        <span class="sentiment-dot" style="background:#16a34a" title="Sentiment: 0.70"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.techmarketview.com/ukhotviews/archive/2026/07/02/capgemini-secures-36m-national-highways-contract" target="_blank" rel="noopener">Capgemini Secures £36m National Highways Service Management Contract</a></h3>
-      <p class="card-summary">Capgemini UK has been appointed National Highways' Service Management Maturity partner on a five-year contract worth £35.9m, running 1 July 2026 to 30 June 2031.</p>
-    </div>
-    <div class="card" data-date="2026-07-02" data-company="deloitte">
-      <div class="card-header">
-        <span class="company-tag" style="background:#059669">Deloitte</span>
-        <span class="card-date">2026-07-02</span>
-        <span class="sentiment-dot" style="background:#16a34a" title="Sentiment: 0.80"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.techmarketview.com/ukhotviews/archive/2026/07/01/home-office-splits-350m-data-deal-between-deloitte-and-pa-consulting" target="_blank" rel="noopener">Home Office splits £350m data deal between Deloitte and PA Consulting</a></h3>
-      <p class="card-summary">The UK Home Office committed up to £350m to enhance its Data Services and Analytics unit, awarding Lot A (£200m) to Deloitte and Lot B (£150m) to PA Consulting.</p>
-    </div>
-    <div class="card" data-date="2026-07-01" data-company="capgemini">
-      <div class="card-header">
-        <span class="company-tag" style="background:#0891b2">Capgemini</span>
-        <span class="card-date">2026-07-01</span>
-        <span class="sentiment-dot" style="background:#16a34a" title="Sentiment: 0.75"></span>
-      </div>
-      <h3 class="card-headline"><a href="https://www.thinkdigitalpartners.com/news/2026/06/30/uk-digital-procurement-roundup-june-2026-contracts-frameworks-and-market-moves/" target="_blank" rel="noopener">HMRC selects Capgemini, NICE and Route 101 for customer service transformation</a></h3>
-      <p class="card-summary">HMRC has selected Capgemini alongside NICE and Route 101 to deliver its next-phase customer experience transformation programme, introducing AI-enabled capabilities.</p>
-    </div>
-    </div>
-    <div class="no-results" id="no-results" style="display:none">No stories found for this filter.</div>
+  <aside class="sidebar">
+    <h3>Archive</h3>
+    <ul id="archive-list" style="list-style:none"><li class="archive-item active" data-date="all">All editions <span class="count">104</span></li>
+<li class="archive-item" data-date="2026-08-07">Fri, 7 Aug 2026 <span class="count">2</span></li>
+<li class="archive-item" data-date="2026-08-06">Thu, 6 Aug 2026 <span class="count">1</span></li>
+<li class="archive-item" data-date="2026-08-05">Wed, 5 Aug 2026 <span class="count">2</span></li>
+<li class="archive-item" data-date="2026-08-04">Tue, 4 Aug 2026 <span class="count">3</span></li>
+<li class="archive-item" data-date="2026-08-03">Mon, 3 Aug 2026 <span class="count">4</span></li>
+<li class="archive-item" data-date="2026-07-31">Fri, 31 Jul 2026 <span class="count">3</span></li>
+<li class="archive-item" data-date="2026-07-30">Thu, 30 Jul 2026 <span class="count">4</span></li>
+<li class="archive-item" data-date="2026-07-29">Wed, 29 Jul 2026 <span class="count">1</span></li>
+<li class="archive-item" data-date="2026-07-28">Tue, 28 Jul 2026 <span class="count">1</span></li>
+<li class="archive-item" data-date="2026-07-27">Mon, 27 Jul 2026 <span class="count">1</span></li>
+<li class="archive-item" data-date="2026-07-26">Sun, 26 Jul 2026 <span class="count">1</span></li>
+<li class="archive-item" data-date="2026-07-24">Fri, 24 Jul 2026 <span class="count">1</span></li>
+<li class="archive-item" data-date="2026-07-23">Thu, 23 Jul 2026 <span class="count">4</span></li>
+<li class="archive-item" data-date="2026-07-22">Wed, 22 Jul 2026 <span class="count">2</span></li>
+<li class="archive-item" data-date="2026-07-21">Tue, 21 Jul 2026 <span class="count">2</span></li>
+<li class="archive-item" data-date="2026-07-17">Fri, 17 Jul 2026 <span class="count">3</span></li>
+<li class="archive-item" data-date="2026-07-15">Wed, 15 Jul 2026 <span class="count">2</span></li>
+<li class="archive-item" data-date="2026-07-14">Tue, 14 Jul 2026 <span class="count">3</span></li>
+<li class="archive-item" data-date="2026-07-13">Mon, 13 Jul 2026 <span class="count">1</span></li>
+<li class="archive-item" data-date="2026-07-10">Fri, 10 Jul 2026 <span class="count">1</span></li>
+<li class="archive-item" data-date="2026-07-09">Thu, 9 Jul 2026 <span class="count">3</span></li>
+<li class="archive-item" data-date="2026-07-08">Wed, 8 Jul 2026 <span class="count">3</span></li>
+<li class="archive-item" data-date="2026-07-07">Tue, 7 Jul 2026 <span class="count">1</span></li>
+<li class="archive-item" data-date="2026-07-03">Fri, 3 Jul 2026 <span class="count">4</span></li>
+<li class="archive-item" data-date="2026-07-02">Thu, 2 Jul 2026 <span class="count">6</span></li>
+<li class="archive-item" data-date="2026-07-01">Wed, 1 Jul 2026 <span class="count">10</span></li>
+<li class="archive-item" data-date="2026-06-30">Tue, 30 Jun 2026 <span class="count">2</span></li>
+<li class="archive-item" data-date="2026-06-29">Mon, 29 Jun 2026 <span class="count">1</span></li>
+<li class="archive-item" data-date="2026-06-28">Sun, 28 Jun 2026 <span class="count">1</span></li>
+<li class="archive-item" data-date="2026-06-27">Sat, 27 Jun 2026 <span class="count">2</span></li>
+<li class="archive-item" data-date="2026-06-26">Fri, 26 Jun 2026 <span class="count">3</span></li>
+<li class="archive-item" data-date="2026-06-25">Thu, 25 Jun 2026 <span class="count">1</span></li>
+<li class="archive-item" data-date="2026-06-24">Wed, 24 Jun 2026 <span class="count">2</span></li>
+<li class="archive-item" data-date="2026-06-23">Tue, 23 Jun 2026 <span class="count">23</span></li></ul>
+  </aside>
+  <main class="main">
+    <div class="filters" id="company-filters"><button class="chip active" data-company="all">All</button>
+<button class="chip" data-company="Atos / Eviden" style="border-color:#7c3aed;color:#7c3aed">Atos / Eviden</button>
+<button class="chip" data-company="Atos/Eviden" style="border-color:#7c3aed;color:#7c3aed">Atos/Eviden</button>
+<button class="chip" data-company="CGI" style="border-color:#d97706;color:#d97706">CGI</button>
+<button class="chip" data-company="Capgemini" style="border-color:#7c3aed;color:#7c3aed">Capgemini</button>
+<button class="chip" data-company="Capita" style="border-color:#dc2626;color:#dc2626">Capita</button>
+<button class="chip" data-company="Deloitte" style="border-color:#059669;color:#059669">Deloitte</button>
+<button class="chip" data-company="Fujitsu" style="border-color:#d97706;color:#d97706">Fujitsu</button>
+<button class="chip" data-company="IBM" style="border-color:#1d4ed8;color:#1d4ed8">IBM</button>
+<button class="chip" data-company="Multiple" style="border-color:#6b7280;color:#6b7280">Multiple</button>
+<button class="chip" data-company="PA Consulting" style="border-color:#0891b2;color:#0891b2">PA Consulting</button>
+<button class="chip" data-company="PwC" style="border-color:#be185d;color:#be185d">PwC</button></div>
+    <div class="cards" id="cards-container"></div>
   </main>
   <aside class="right-panel">
-    <h4>📊 7-Day Sentiment</h4>
-
-        <div class="sentiment-row">
-          <div class="sentiment-company">IBM</div>
-          <div class="sentiment-bar-wrap"><div class="sentiment-bar" style="width:50%;background:#d1d5db"></div></div>
-          <div class="sentiment-label" style="color:#9ca3af">— No data</div>
-        </div>
-        <div class="sentiment-row">
-          <div class="sentiment-company">Capgemini</div>
-          <div class="sentiment-bar-wrap">
-            <div class="sentiment-bar" style="width:85%;background:#16a34a"></div>
-          </div>
-          <div class="sentiment-label" style="color:#16a34a">🟢 Positive</div>
-        </div>
-        <div class="sentiment-row">
-          <div class="sentiment-company">Deloitte</div>
-          <div class="sentiment-bar-wrap">
-            <div class="sentiment-bar" style="width:80%;background:#16a34a"></div>
-          </div>
-          <div class="sentiment-label" style="color:#16a34a">🟢 Positive</div>
-        </div>
-        <div class="sentiment-row">
-          <div class="sentiment-company">CGI</div>
-          <div class="sentiment-bar-wrap"><div class="sentiment-bar" style="width:50%;background:#d1d5db"></div></div>
-          <div class="sentiment-label" style="color:#9ca3af">— No data</div>
-        </div>
-        <div class="sentiment-row">
-          <div class="sentiment-company">PA Consulting</div>
-          <div class="sentiment-bar-wrap">
-            <div class="sentiment-bar" style="width:63%;background:#ca8a04"></div>
-          </div>
-          <div class="sentiment-label" style="color:#ca8a04">🟡 Neutral+</div>
-        </div>
-        <div class="sentiment-row">
-          <div class="sentiment-company">Capita</div>
-          <div class="sentiment-bar-wrap">
-            <div class="sentiment-bar" style="width:49%;background:#6b7280"></div>
-          </div>
-          <div class="sentiment-label" style="color:#6b7280">⚪ Neutral</div>
-        </div>
-        <div class="sentiment-row">
-          <div class="sentiment-company">PwC</div>
-          <div class="sentiment-bar-wrap"><div class="sentiment-bar" style="width:50%;background:#d1d5db"></div></div>
-          <div class="sentiment-label" style="color:#9ca3af">— No data</div>
-        </div>
-        <div class="sentiment-row">
-          <div class="sentiment-company">Atos / Eviden</div>
-          <div class="sentiment-bar-wrap">
-            <div class="sentiment-bar" style="width:71%;background:#ca8a04"></div>
-          </div>
-          <div class="sentiment-label" style="color:#ca8a04">🟡 Neutral+</div>
-        </div>
-        <div class="sentiment-row">
-          <div class="sentiment-company">Fujitsu</div>
-          <div class="sentiment-bar-wrap">
-            <div class="sentiment-bar" style="width:18%;background:#dc2626"></div>
-          </div>
-          <div class="sentiment-label" style="color:#dc2626">🔴 Negative</div>
-        </div>
-    <div class="sentiment-legend">
-      <div>🟢 ≥0.5 Positive</div>
-      <div>🟡 0.1–0.49 Neutral+</div>
-      <div>⚪ ±0.1 Neutral</div>
-      <div>🟠 -0.5–-0.1 Caution</div>
-      <div>🔴 ≤-0.5 Negative</div>
+    <div class="panel-title">7-Day Pulse</div>
+    
+  <div class="pulse-row">
+    <div class="pulse-company">IBM</div>
+    <div class="pulse-bar-container">
+      <div class="pulse-bar-center"></div>
+      
+    </div>
+    <div class="pulse-label" style="color:#9ca3af">⚪ No data</div>
+  </div>
+  <div class="pulse-row">
+    <div class="pulse-company">Capgemini</div>
+    <div class="pulse-bar-container">
+      <div class="pulse-bar-center"></div>
+      
+    </div>
+    <div class="pulse-label" style="color:#9ca3af">⚪ No data</div>
+  </div>
+  <div class="pulse-row">
+    <div class="pulse-company">Deloitte</div>
+    <div class="pulse-bar-container">
+      <div class="pulse-bar-center"></div>
+      <div class="pulse-bar" style="width:60%;margin-left:50%;background:#22c55e"></div>
+    </div>
+    <div class="pulse-label" style="color:#16a34a">🟢 0.60</div>
+  </div>
+  <div class="pulse-row">
+    <div class="pulse-company">CGI</div>
+    <div class="pulse-bar-container">
+      <div class="pulse-bar-center"></div>
+      
+    </div>
+    <div class="pulse-label" style="color:#9ca3af">⚪ No data</div>
+  </div>
+  <div class="pulse-row">
+    <div class="pulse-company">PA Consulting</div>
+    <div class="pulse-bar-container">
+      <div class="pulse-bar-center"></div>
+      <div class="pulse-bar" style="width:28%;margin-left:50%;background:#eab308"></div>
+    </div>
+    <div class="pulse-label" style="color:#ca8a04">🟡 0.28</div>
+  </div>
+  <div class="pulse-row">
+    <div class="pulse-company">Capita</div>
+    <div class="pulse-bar-container">
+      <div class="pulse-bar-center"></div>
+      <div class="pulse-bar" style="width:1%;margin-left:calc(50% - 1%);background:#9ca3af"></div>
+    </div>
+    <div class="pulse-label" style="color:#6b7280">⚪ -0.01</div>
+  </div>
+  <div class="pulse-row">
+    <div class="pulse-company">PwC</div>
+    <div class="pulse-bar-container">
+      <div class="pulse-bar-center"></div>
+      
+    </div>
+    <div class="pulse-label" style="color:#9ca3af">⚪ No data</div>
+  </div>
+  <div class="pulse-row">
+    <div class="pulse-company">Atos / Eviden</div>
+    <div class="pulse-bar-container">
+      <div class="pulse-bar-center"></div>
+      <div class="pulse-bar" style="width:20%;margin-left:50%;background:#eab308"></div>
+    </div>
+    <div class="pulse-label" style="color:#ca8a04">🟡 0.20</div>
+  </div>
+  <div class="pulse-row">
+    <div class="pulse-company">Fujitsu</div>
+    <div class="pulse-bar-container">
+      <div class="pulse-bar-center"></div>
+      <div class="pulse-bar" style="width:55%;margin-left:calc(50% - 55%);background:#ef4444"></div>
+    </div>
+    <div class="pulse-label" style="color:#dc2626">🔴 -0.55</div>
+  </div>
+    <div class="pulse-legend">
+      🟢 ≥0.5 Positive · 🟡 0.1–0.49 Neutral+ · ⚪ Neutral · 🟠 Caution · 🔴 ≤-0.5 Negative
     </div>
   </aside>
 </div>
-
-<!-- Chatbot -->
-<button class="chat-btn" onclick="toggleChat()">💬 Ask Watchtower</button>
-<div class="chat-window" id="chatWindow">
-  <div class="chat-head">
-    <div class="chat-head-avatar">📡</div>
-    <div><div class="chat-head-name">Watchtower AI</div><div class="chat-head-sub">Ask about UK public sector news</div></div>
+<button id="chat-btn" title="Ask Watchtower">💬</button>
+<div id="chat-window">
+  <div class="chat-header">
+    <div class="chat-avatar">W</div>
+    <div class="chat-title-block">
+      <div class="chat-title">Watchtower AI</div>
+      <div class="chat-subtitle">Ask about UKI public sector</div>
+    </div>
+    <button id="close-chat">×</button>
   </div>
-  <div class="chat-messages" id="chatMessages">
-    <div class="chat-msg bot">Hi! I'm Watchtower AI. Ask me about any of the 9 tracked companies, contracts, risks, or trends.</div>
+  <div id="messages">
+    <div class="msg bot">Hi! I can answer questions about recent UK & Ireland public sector news. Try asking about a company, contract win, or risk story.</div>
   </div>
-  <div class="chat-suggestions" id="chatSuggestions">
-    <span class="chat-suggestion" onclick="askChat('Latest on Capita?')">Latest on Capita?</span>
-    <span class="chat-suggestion" onclick="askChat('Fujitsu Horizon update?')">Fujitsu Horizon?</span>
-    <span class="chat-suggestion" onclick="askChat('Contract wins this week?')">Recent wins?</span>
-    <span class="chat-suggestion" onclick="askChat('Biggest risks?')">Biggest risks?</span>
+  <div class="suggestions" id="suggestions">
+    <div class="sugg-chip">Latest on Capita?</div><div class="sugg-chip">Fujitsu Horizon?</div><div class="sugg-chip">Contract wins?</div><div class="sugg-chip">Biggest risks?</div>
   </div>
   <div class="chat-input-row">
-    <input class="chat-input" id="chatInput" type="text" placeholder="Ask a question..." onkeydown="if(event.key==='Enter')sendChat()">
-    <button class="chat-send" onclick="sendChat()">↑</button>
+    <input id="chat-input" type="text" placeholder="Ask about any company or topic…" autocomplete="off">
+    <button id="send-btn">Send</button>
   </div>
 </div>
-
 <script>
-const STORIES = [{"date": "2026-08-07", "company": "Capita", "headline": "Capita CEO receives scathing rebuttal from employee over botched Civil Service Pension contract", "summary": "A Capita staff member publicly challenged CEO Adolfo Hernandez after he claimed the 'right people, processes and technology' were now in place to fix the £239m Civil Service Pension Scheme (CSPS) administration. The employee described service as 'abysmal', revealed members had died waiting for resolution, and noted the backlog has grown by 40,000 cases since the December 2025 go-live. Staff report missing line managers, manual workflows, and no visible technology improvements.", "url": "https://www.computerweekly.com/news/366648014/Capita-CEO-receives-scathing-rebuttal-from-employee-over-botched-contract", "sentiment": -0.7}, {"date": "2026-08-07", "company": "Capita", "headline": "Analysis: Can Capita recover UK public sector standing despite Civil Service Pension crisis?", "summary": "Diginomica analysis asks whether Capita — the UK's largest BPO and professional services firm — can restore its government credibility following the highly-publicised Civil Service Pension Scheme failure. CEO Hernandez acknowledged serious service shortfalls but insisted the firm is committed to resolution; critics counter that history suggests accountability rarely prevents re-award of public sector contracts in the UK.", "url": "https://diginomica.com/failure-has-never-been-barrier-services-firms-winning-uk-public-sector-business-can-capita-prove", "sentiment": -0.4}, {"date": "2026-08-06", "company": "PA Consulting", "headline": "PA Consulting Q3 Revenue Slips but UK Public Sector Backlog Surges 9.3%", "summary": "PA Consulting's Q3 FY2026 results show a modest revenue dip year-on-year, but operating profit margin improved 80 basis points to 22.4% and its order backlog climbed 9.3% to $459m. Two Home Office contracts worth a combined £230m, signed earlier in 2026, continue to anchor the firm's strong public sector pipeline.", "url": "https://www.techmarketview.com/ukhotviews/archive/2026/08/05/a-slow-q3-for-pa", "sentiment": 0.1}, {"date": "2026-08-05", "company": "Capita", "headline": "Capita H1 2026 Results: Revenue Up 1.6% But Profits Squeezed as Civil Service Pension Crisis Deepens", "summary": "Capita reported H1 2026 revenue of £906m (+1.6%) but adjusted operating profit fell 32% to £32m, weighed down by Civil Service Pension Scheme (CSPS) remediation costs. The company secured a £425m TfL road user charging extension and grew its order book to £4bn.", "url": "https://www.marketbeat.com/instant-alerts/capita-h1-earnings-call-highlights-2026-08-04/", "sentiment": -0.3}, {"date": "2026-08-05", "company": "Deloitte", "headline": "Deloitte Acquires UK Cost Verification Firm The Orange Partnership to Bolster Public Sector Capital Advisory", "summary": "Deloitte UK has acquired The Orange Partnership, a Midlands-based chartered accountancy practice specialising in independent cost verification and open-book contract assurance for major capital projects, strengthening its Capital Projects Advisory capability.", "url": "https://www.deloitte.com/uk/en/about/press-room/deloitte-acquires-cost-verification-business-the-orange-partnership.html", "sentiment": 0.5}, {"date": "2026-08-04", "company": "Capita", "headline": "Capita secures five-year extension to TfL Road User Charging contracts", "summary": "Capita has secured a five-year extension to its two Transport for London Road User Charging contracts, covering operations from October 2026 to September 2031. The combined contract value is approximately £424.6m.", "url": "https://www.capita.com/news-and-insights/news/2026/capita-secures-five-year-extension-transport-for-london", "sentiment": 0.85}, {"date": "2026-08-04", "company": "Fujitsu", "headline": "MPs demand answers on Fujitsu's inclusion in £54bn government procurement frameworks", "summary": "The Business and Trade Select Committee has written to the Secretary of State demanding assurances that Fujitsu's self-imposed ban on bidding for new public sector customers will be honoured after the supplier was confirmed on four government frameworks worth over £54bn.", "url": "https://www.computerweekly.com/news/366646721/MPs-demand-answers-on-Fujitsus-inclusion-in-lucrative-frameworks", "sentiment": -0.55}, {"date": "2026-08-04", "company": "PA Consulting", "headline": "PA Consulting delivers DfT transport resilience appraisal framework", "summary": "The Department for Transport has published a new research report, developed by PA Consulting, introducing a consistent framework for appraising resilience in transport schemes.", "url": "https://www.ciht.org.uk/news/new-dft-research-provides-framework-for-appraising-transport-resilience/", "sentiment": 0.45}, {"date": "2026-08-03", "company": "Atos / Eviden", "headline": "Atos Joins TechMarketView '26 as Premier Sponsor, Spotlighting UK Public Sector AI", "summary": "Atos UK&I has confirmed its position as premier sponsor of An Evening with TechMarketView '26, underscoring its strategic priorities of digital sovereignty, mission-critical AI, and embedded cybersecurity.", "url": "https://www.techmarketview.com/ukhotviews/archive/2026/08/03/tmve26-Atos-joins-as-premier-sponsor", "sentiment": 0.2}, {"date": "2026-08-03", "company": "Capita", "headline": "Capita Ranks Third in UK Public Sector Contract Awards for 2026 with £1.9bn Secured", "summary": "Capita Business Services Ltd holds third place in the UK public sector supplier standings for 2026 year-to-date, with £1.9bn in contract award value across 6 awards through Q1 and Q2.", "url": "https://www.tendergazette.com/news/tender-gazette-supplier-standings-2026-top-20-year-to-date", "sentiment": 0.5}, {"date": "2026-07-31", "company": "Atos / Eviden", "headline": "Atos UK&I Delivers Third Consecutive Quarter of Growth with 7.1% Organic Revenue Uplift", "summary": "Atos UK&Ireland continued its positive momentum, reporting a third consecutive quarter of organic revenue growth at 7.1%, backed by a strong 10.4% operating margin. H1 2026 revenue for the UK&I region reached €606m.", "url": "https://www.techmarketview.com/news/archive/2026/07/30/ukhotviewsextra-atos-uki-three-quarters-of-growth-and-counting", "sentiment": 0.65}, {"date": "2026-07-31", "company": "Capgemini", "headline": "Capgemini UK&I Up 21% in H1 FY2026, Backed by £500m HMRC Contract Win", "summary": "Capgemini UK&Ireland posted 21.1% revenue growth in H1 FY2026, driven by strong public sector demand and acquisitions. The period included the landmark £500m HMRC Contact Centre as a Service contract win.", "url": "https://www.techmarketview.com/ukhotviews/archive/2026/07/30/capgemini-uk-up-21-in-h1", "sentiment": 0.7}, {"date": "2026-07-31", "company": "Fujitsu", "headline": "Post Office Horizon Replacement Delayed a Sixth Time as Subpostmasters Accuse Fujitsu of Checking Out", "summary": "The Post Office has extended the standstill period on the Horizon replacement contract—now delayed for a sixth time—to 21 August. Subpostmasters report a marked deterioration in Horizon performance, accusing Fujitsu of taking its foot off the gas.", "url": "https://www.computerweekly.com/news/366646732/Subpostmasters-anxious-over-Horizon-replacement-as-it-is-delayed-yet-again", "sentiment": -0.7}, {"date": "2026-07-30", "company": "Atos/Eviden", "headline": "Atos UK & Ireland Posts 7.1% Revenue Growth in H1 2026", "summary": "Atos Group's UK & Ireland business delivered revenues of €606 million in H1 2026, up 7.1% organically year-on-year, with operating margin improved to 10.4%.", "url": "https://www.globenewswire.com/news-release/2026/07/30/3335769/0/en/atos-group-h1-2026-results.html", "sentiment": 0.75}, {"date": "2026-07-30", "company": "CGI", "headline": "CGI UK Holds Steady in Q3 FY2026 with Five-Quarter Margin Uptrend", "summary": "CGI's UK and Australia segment delivered Q3 FY2026 revenue of CAN$585.1 million, up 2.5%, with EBIT margin rising to 16.1% from 13.7% a year ago — the fifth consecutive quarter of margin improvement.", "url": "https://www.techmarketview.com/news/archive/2026/07/29/ukhotviewsextra-cgi-q3-fy2026-uk-holds-up-as-growth-slows-across-the-group", "sentiment": 0.35}, {"date": "2026-07-30", "company": "Capgemini", "headline": "Capgemini UK & Ireland Surges 21% as Group Upgrades Full-Year 2026 Outlook", "summary": "Capgemini reported H1 2026 group revenues of €12.1 billion (+8.8%), upgrading its full-year growth target. The UK & Ireland region was the standout performer, growing 21.1% at constant exchange rates.", "url": "https://finance.yahoo.com/markets/stocks/articles/capgemini-upgrades-2026-outlook.html", "sentiment": 0.8}, {"date": "2026-07-30", "company": "PA Consulting", "headline": "PA Consulting Replaces Google on Government AI Tutoring Pilot for Disadvantaged Pupils", "summary": "PA Consulting Services has joined the Department for Education's AI Tutoring Pioneer Group after Google UK was removed. The contract slot, worth £360,000 including VAT, targets up to 450,000 disadvantaged pupils.", "url": "https://www.techmarketview.com/ukhotviews/archive/2026/07/29/google-dropped-from-dfes-ai-tutoring-pilot-replaced-by-pa-consulting", "sentiment": 0.45}, {"date": "2026-07-29", "company": "Fujitsu", "headline": "UK Public Does Not Trust Fujitsu, But Government Continues to Award Contracts", "summary": "Despite 95% of respondents in a Daily Mail poll saying Fujitsu should be blacklisted after the Post Office Horizon scandal, the government has placed it on four major procurement frameworks worth over £54bn.", "url": "https://www.computerweekly.com/news/366646332/UK-Public-dont-trust-Fujitsu-but-government-does", "sentiment": -0.7}, {"date": "2026-07-28", "company": "PA Consulting", "headline": "PA Consulting Replaces Google as UK Government AI Tutoring Provider for Schools", "summary": "The UK Department for Education has added PA Consulting as a replacement provider for its AI tutoring pilot scheme targeting disadvantaged pupils.", "url": "https://schoolsweek.co.uk/google-no-longer-helping-government-develop-ai-tutoring-tools-for-schools/", "sentiment": 0.6}, {"date": "2026-07-27", "company": "Fujitsu", "headline": "Fujitsu Secures £61 Million HMRC Contract Despite Lingering Horizon Post Office Scandal", "summary": "Fujitsu has secured a £61 million IT contract with HMRC, sparking political outrage as the firm continues to hold government contracts worth an estimated £500 million while contributing nothing to the £1.8 billion Post Office Horizon scandal compensation fund.", "url": "https://streamlinefeed.co.ke/news/fujitsu-secures-61-million-hmrc-contract-horizon-post-office-scandal-2026", "sentiment": -0.75}, {"date": "2026-07-26", "company": "Fujitsu", "headline": "Horizon Post Office Scandal: Police Investigation Faces Funding Crisis as Final Report Delayed Again", "summary": "Operation Olympos, the police investigation into the Post Office Horizon scandal implicating Fujitsu, is warning of timeline slippage without urgent funding. The Public Inquiry final report may not be published until early 2027.", "url": "https://labourhub.org.uk/2026/07/26/the-horizon-post-office-scandal-what-next/", "sentiment": -0.8}, {"date": "2026-07-24", "company": "Deloitte", "headline": "Deloitte Launches \"Flying High\" UK Aerospace & Defence Policy Paper at Farnborough", "summary": "Deloitte UK published a major policy paper at the Farnborough International Airshow calling for strategic government investment to build aerospace resilience and drive innovation.", "url": "https://www.instagram.com/reel/DbIelSliE5G/", "sentiment": 0.4}, {"date": "2026-07-23", "company": "Atos/Eviden", "headline": "Eviden Showcases UK Defence & Intelligence Capabilities at DCIIS 2026", "summary": "Eviden participated in DCIIS 2026 demonstrating security and digital capabilities to government and defence clients, with 56% of attendees initiating new business discussions.", "url": "https://www.instagram.com/p/DbGrQ_AjI1L/", "sentiment": 0.3}, {"date": "2026-07-23", "company": "CGI", "headline": "CGI Director Calls for Mandatory SME Participation in UK Government Contracts", "summary": "Sonya Anderson, CGI's Director of Central Government, called for SME inclusion to be mandated and measured in all government procurement from the outset.", "url": "https://www.techuk.org/resource/sharing-to-succeed-from-targets-to-outcomes.html", "sentiment": 0.2}, {"date": "2026-07-23", "company": "Capita", "headline": "MPs Debate Capita Pension Crisis as Cabinet Office Confirms Insourcing Plan", "summary": "MPs raised urgent questions in Parliament about Capita's ongoing failure to administer the £239m Civil Service Pension Scheme, with the Cabinet Office confirming it is actively planning to bring the scheme back in-house.", "url": "https://www.aol.co.uk/articles/retired-uk-civil-servants-failed-050047000.html", "sentiment": -0.8}, {"date": "2026-07-23", "company": "IBM", "headline": "IBM Expert Analyses New Government Commercial Agency Impact on UK Tech Suppliers", "summary": "IBM's Giles Hartwright published a TechUK guest piece examining the transition from Crown Commercial Service (CCS) to the new Government Commercial Agency (GCA).", "url": "https://www.techuk.org/resource/sharing-to-succeed-from-ccs-to-gca-what-has-really-happened-to-govts-commercial-function.html", "sentiment": 0.2}, {"date": "2026-07-22", "company": "Capita", "headline": "Pressure mounting on Government to pause Capita Synergy contract", "summary": "PCS union is calling for the Government to pause Capita's £370m Synergy contract serving over 250,000 civil servants' payroll and HR, citing poor track record.", "url": "https://www.pcs.org.uk/news-events/news/pressure-mounting-government-pause-synergy-contract", "sentiment": -0.8}, {"date": "2026-07-22", "company": "IBM", "headline": "UK government scraps DSIT: Burnham signals sweeping end to outsourcing era", "summary": "New PM Andy Burnham is abolishing DSIT and promising to bring government IT contracts back in house — a direct threat to major public-sector IT suppliers including IBM, Capgemini, Deloitte, CGI, and others.", "url": "https://www.theregister.com/public-sector/2026/07/21/ukgovs-tech-department-gets-the-chop-after-two-years/5275573", "sentiment": -0.4}, {"date": "2026-07-21", "company": "Atos/Eviden", "headline": "Capita pension fallout puts Atos UK public sector contracts under scrutiny", "summary": "The government's growing appetite for insourcing has drawn attention to Atos's own public sector exposure in the UK.", "url": "https://simplywall.st/stocks/us/software/nyse-dxc/dxc-technology/news/capita-fallout-puts-dxc-atos-uk-public-sector-exposure-in-th", "sentiment": -0.4}, {"date": "2026-07-21", "company": "Capita", "headline": "Government admits Capita has failed civil service pension scheme, plans insourcing", "summary": "The UK government has admitted that outsourcing the civil service pension scheme to Capita was a failure, with Cabinet Office minister confirming active plans for insourcing.", "url": "https://www.theguardian.com/business/2026/jul/20/retired-uk-civil-servants-failed-pension-outsourcing-government-capita", "sentiment": -0.7}, {"date": "2026-07-17", "company": "Capita", "headline": "Ofsted Chair to Lead Independent Review into Capita SATs Marking Fiasco", "summary": "The government launched an independent review into serious failings in Capita's management of the 2026 KS2 SATs marking process, with results delivered nine days late.", "url": "https://schoolsweek.co.uk/ofsted-chair-to-lead-review-into-sats-marking-fiasco/", "sentiment": -0.75}, {"date": "2026-07-17", "company": "Capita", "headline": "PAC Warns £1.15bn Government Shared Services Programme at Risk, Questions Capita Suitability", "summary": "The Public Accounts Committee warned that the government's Shared Services strategy risks becoming a costly failure, explicitly questioning Capita's suitability to deliver a £370m HR and payroll contract.", "url": "https://www.techmarketview.com/ukhotviews/archive/2026/07/16/pac-casts-doubt-over-government-shared-services", "sentiment": -0.6}, {"date": "2026-07-15", "company": "Capita", "headline": "Capita Wins Role in £2bn British Army Collective Training Programme", "summary": "Capita has been selected to join the Omnia Training consortium to deliver the British Army's new Collective Training System under a 15-year, £2 billion contract.", "url": "https://uk.finance.yahoo.com/news/capita-wins-role-2bn-british-072603819.html", "sentiment": 0.65}, {"date": "2026-07-15", "company": "Fujitsu", "headline": "UK Government Publishes £551m Plan to Exit Fujitsu Horizon Contract", "summary": "The UK Government has published the Post Office Future Technology Portfolio Summary Business Case — a £551.8 million programme to modernise and transition away from Fujitsu's Horizon system.", "url": "https://www.gov.uk/government/publications/post-office-future-technology-portfolio-summary-business-case/summary-business-case", "sentiment": -0.35}, {"date": "2026-07-14", "company": "Capita", "headline": "Government Still Waiting for Capita Technology Rectification Plan in Whitehall Pensions Crisis", "summary": "MPs warned that restoring the Civil Service Pension Scheme to normal service levels will take several more months, as Capita is expected to miss 16 of 21 KPIs.", "url": "https://www.publictechnology.net/2026/07/13/business-and-industry/government-still-waiting-for-capita-technology-rectification-plan-in-whitehall-pensions-crisis/", "sentiment": -0.8}, {"date": "2026-07-14", "company": "Deloitte", "headline": "Irish Government's €102.8m Deloitte Bill Branded 'Absolutely Shocking' by Opposition TDs", "summary": "Ireland's Department of Social Protection spent €102.8m on Deloitte consultancy and IT services between 2020 and 2025, prompting calls for an audit of all external firms.", "url": "https://www.irishexaminer.com/news/politics/arid-41877548.html", "sentiment": -0.6}, {"date": "2026-07-14", "company": "Fujitsu", "headline": "Fujitsu Has Not Provided Compensation Despite Moral Obligation Over Post Office Horizon Scandal", "summary": "A newly published book highlights that Fujitsu has apologised but still has not provided direct financial compensation to affected sub-postmasters, despite publicly acknowledging a moral obligation.", "url": "https://japannews.yomiuri.co.jp/culture/books-literature/20260713-337912/", "sentiment": -0.7}, {"date": "2026-07-13", "company": "Capita", "headline": "MOD awards Omnia Training consortium £2bn contract for AI-based training and analytics", "summary": "The UK MoD awarded a £2 billion, 15-year contract to Omnia Training — a consortium including Capita — to deploy AI, advanced analytics and virtual environments to train up to 60,000 soldiers per year.", "url": "https://www.insidermedia.com/news/national/mod-awards-consortium-2bn-contract-for-ai-based-training-and-analytics", "sentiment": 0.85}, {"date": "2026-07-10", "company": "Capita", "headline": "Capita to lose money on pension debacle but has government's private parts in its grip", "summary": "At a joint PAC/PACAC hearing, Capita's CEO admitted the AI-automation technology for the Civil Service Pension Scheme failed entirely, leaving the company set to make no money on its £239m contract.", "url": "https://www.computerweekly.com/news/366645700/Capita-to-lose-money-on-pension-debacle-but-has-governments-private-parts-in-its-grip", "sentiment": -0.9}, {"date": "2026-07-09", "company": "CGI", "headline": "CGI adds geospatial data role at HM Land Registry", "summary": "CGI has won HM Land Registry's Strategic Data Partner contract, worth up to £14.1m over five years starting 1 July 2026.", "url": "https://www.techmarketview.com/ukhotviews/archive/2026/07/08/cgi-adds-geospatial-data-role-at-hm-land-registry", "sentiment": 0.7}, {"date": "2026-07-08", "company": "Deloitte", "headline": "UK Government Launches National Cyber Resilience Pledge; Deloitte Joins as Founding Signatory", "summary": "The UK government launched its National Cyber Resilience Pledge at 10 Downing Street, with Deloitte LLP joining as a founding signatory alongside M&S, Nationwide, and Microsoft UK.", "url": "https://www.gov.uk/government/news/businesses-across-britain-sign-up-to-cyber-resilience-pledge-as-ministers-urge-firms-to-strengthen-cyber-defences", "sentiment": 0.6}, {"date": "2026-07-02", "company": "Capgemini", "headline": "Capgemini Secures £36m National Highways Service Management Contract", "summary": "Capgemini UK has been appointed National Highways' Service Management Maturity partner on a five-year contract worth £35.9m, running 1 July 2026 to 30 June 2031.", "url": "https://www.techmarketview.com/ukhotviews/archive/2026/07/02/capgemini-secures-36m-national-highways-contract", "sentiment": 0.7}, {"date": "2026-07-02", "company": "Deloitte", "headline": "Home Office splits £350m data deal between Deloitte and PA Consulting", "summary": "The UK Home Office committed up to £350m to enhance its Data Services and Analytics unit, awarding Lot A (£200m) to Deloitte and Lot B (£150m) to PA Consulting.", "url": "https://www.techmarketview.com/ukhotviews/archive/2026/07/01/home-office-splits-350m-data-deal-between-deloitte-and-pa-consulting", "sentiment": 0.8}, {"date": "2026-07-01", "company": "Capgemini", "headline": "HMRC selects Capgemini, NICE and Route 101 for customer service transformation", "summary": "HMRC has selected Capgemini alongside NICE and Route 101 to deliver its next-phase customer experience transformation programme, introducing AI-enabled capabilities.", "url": "https://www.thinkdigitalpartners.com/news/2026/06/30/uk-digital-procurement-roundup-june-2026-contracts-frameworks-and-market-moves/", "sentiment": 0.75}];
+const STORIES = [{"date":"2026-08-07","company":"Capita","headline":"Capita CEO receives scathing rebuttal from employee over botched Civil Service Pension contract","summary":"A Capita staff member publicly challenged CEO Adolfo Hernandez after he claimed the 'right people, processes and technology' were now in place to fix the £239m Civil Service Pension Scheme (CSPS) administration. The employee described service as 'abysmal', revealed members had died waiting for resolution, and noted the backlog has grown by 40,000 cases since the December 2025 go-live. Staff report missing line managers, manual workflows, and no visible technology improvements.","url":"https://www.computerweekly.com/news/366648014/Capita-CEO-receives-scathing-rebuttal-from-employee-over-botched-contract","sentiment":-0.7},{"date":"2026-08-07","company":"Capita","headline":"Analysis: Can Capita recover UK public sector standing despite Civil Service Pension crisis?","summary":"Diginomica analysis asks whether Capita — the UK's largest BPO and professional services firm — can restore its government credibility following the highly-publicised Civil Service Pension Scheme failure. CEO Hernandez acknowledged serious service shortfalls but insisted the firm is committed to resolution; critics counter that history suggests accountability rarely prevents re-award of public sector contracts in the UK.","url":"https://diginomica.com/failure-has-never-been-barrier-services-firms-winning-uk-public-sector-business-can-capita-prove","sentiment":-0.4},{"date":"2026-08-06","company":"PA Consulting","headline":"PA Consulting Q3 Revenue Slips but UK Public Sector Backlog Surges 9.3%","summary":"PA Consulting's Q3 FY2026 results show a modest revenue dip year-on-year, but operating profit margin improved 80 basis points to 22.4% and its order backlog climbed 9.3% to $459m. Two Home Office contracts worth a combined £230m, signed earlier in 2026, continue to anchor the firm's strong public sector pipeline. New president Jiten Kachhela is now overseeing the consulting business as PA bets on sustained UK government demand.","url":"https://www.techmarketview.com/ukhotviews/archive/2026/08/05/a-slow-q3-for-pa","sentiment":0.1},{"date":"2026-08-05","company":"Capita","headline":"Capita H1 2026 Results: Revenue Up 1.6% But Profits Squeezed as Civil Service Pension Crisis Deepens","summary":"Capita reported H1 2026 revenue of £906m (+1.6%) but adjusted operating profit fell 32% to £32m, weighed down by Civil Service Pension Scheme (CSPS) remediation costs that hit profitability by £14m. The company secured a £425m Transport for London road user charging extension and grew its order book to £4bn, but warned of negative free cash flow of £35m–£50m for the full year. CEO Adolfo Hernandez called CSPS the company's \"number one operational priority,\" with remediation targets set for September and October. Capita also expanded its AI services strategy, deploying nearly 500 AI agents across public sector operations.","url":"https://www.marketbeat.com/instant-alerts/capita-h1-earnings-call-highlights-2026-08-04/","sentiment":-0.3},{"date":"2026-08-05","company":"Deloitte","headline":"Deloitte Acquires UK Cost Verification Firm The Orange Partnership to Bolster Public Sector Capital Advisory","summary":"Deloitte UK has acquired The Orange Partnership, a Midlands-based chartered accountancy practice specialising in independent cost verification and open-book contract assurance for major capital projects. The acquisition strengthens Deloitte's Capital Projects Advisory capability at a time of increased UK infrastructure spend, with the team bringing 20+ years of experience validating costs on major government and public sector construction programmes. The combined offering covers contract set-up, ongoing cost assurance and final account verification for complex capital programmes.","url":"https://www.deloitte.com/uk/en/about/press-room/deloitte-acquires-cost-verification-business-the-orange-partnership.html","sentiment":0.5},{"date":"2026-08-04","company":"Capita","headline":"Capita secures five-year extension to TfL Road User Charging contracts","summary":"Capita has secured a five-year extension to its two Transport for London Road User Charging contracts, covering operations from October 2026 to September 2031. The combined contract value is approximately £424.6m, supporting London's Congestion Charge, ULEZ, Low Emission Zone, and Tunnels User Charging schemes. Capita has delivered these services since 2016 and the renewal underlines its continuing role as a key public transport services partner.","url":"https://www.capita.com/news-and-insights/news/2026/capita-secures-five-year-extension-transport-for-london","sentiment":0.85},{"date":"2026-08-04","company":"Fujitsu","headline":"MPs demand answers on Fujitsu's inclusion in £54bn government procurement frameworks","summary":"The Business and Trade Select Committee has written to the Secretary of State demanding assurances that Fujitsu's self-imposed ban on bidding for new public sector customers will be honoured after the supplier was confirmed on four government frameworks worth over £54bn in total, including G-Cloud 15 and Technology Services 4. MPs want clarity on whether Fujitsu can use these frameworks to win new government customers during its ongoing moratorium, with answers demanded by 12 August. Fujitsu's role in the Post Office Horizon scandal remains at the centre of ongoing public inquiry proceedings.","url":"https://www.computerweekly.com/news/366646721/MPs-demand-answers-on-Fujitsus-inclusion-in-lucrative-frameworks","sentiment":-0.55},{"date":"2026-08-04","company":"PA Consulting","headline":"PA Consulting delivers DfT transport resilience appraisal framework","summary":"The Department for Transport has published a new research report, developed by PA Consulting, introducing a consistent framework for appraising resilience in transport schemes. The framework evaluates resilience across strategic, economic, and risk dimensions, and addresses acute shocks such as extreme weather and cyber incidents as well as chronic pressures like ageing assets. The work supports the UK Government Resilience Framework and the 2025 Resilience Action Plan, embedding climate adaptation into infrastructure planning.","url":"https://www.ciht.org.uk/news/new-dft-research-provides-framework-for-appraising-transport-resilience/","sentiment":0.45},{"date":"2026-08-03","company":"Atos / Eviden","headline":"Atos Joins TechMarketView '26 as Premier Sponsor, Spotlighting UK Public Sector AI","summary":"Atos UK&I has confirmed its position as premier sponsor of An Evening with TechMarketView '26, scheduled for 8th October at Mall Galleries, London. The event's centrepiece panel will debate agentic AI opportunities and challenges, with participants drawn from Public Sector, Financial Services, and Energy — verticals that together account for more than three-quarters of Atos UK&I's revenue. The sponsorship underscores Atos's strategic priorities of digital sovereignty, mission-critical AI, and embedded cybersecurity.","url":"https://www.techmarketview.com/ukhotviews/archive/2026/08/03/tmve26-Atos-joins-as-premier-sponsor","sentiment":0.2},{"date":"2026-08-03","company":"Capita","headline":"Capita Ranks Third in UK Public Sector Contract Awards for 2026 with £1.9bn Secured","summary":"Capita Business Services Ltd holds third place in the UK public sector supplier standings for 2026 year-to-date, with £1.9bn in contract award value across 6 awards through Q1 and Q2, per Tender Gazette data published 2 August. The result demonstrates Capita's continued recovery momentum in government outsourcing, building on its £370m Synergy Business Process Services win and other recent public sector expansions. Two quarters remain before the final annual rankings close.","url":"https://www.tendergazette.com/news/tender-gazette-supplier-standings-2026-top-20-year-to-date","sentiment":0.5},{"date":"2026-08-03","company":"Deloitte","headline":"Deloitte Leads UK Public Sector Supplier Rankings for 2026 with £6.3bn in Contract Wins","summary":"Deloitte LLP has topped the UK public sector supplier standings for 2026 year-to-date, accumulating £6.3bn in contract award value across 9 awards through Q1 and Q2, according to the Tender Gazette. The figure cements Deloitte's status as the dominant consulting and professional services supplier to UK government, well ahead of second-placed DHL Supply Chain (£2.0bn). The standings remain provisional with two quarters still to run.","url":"https://www.tendergazette.com/news/tender-gazette-supplier-standings-2026-top-20-year-to-date","sentiment":0.7},{"date":"2026-08-03","company":"Multiple","headline":"TechMarketView Publishes UK Public Sector SITS Suppliers, Trends & Forecasts 2026","summary":"TechMarketView today published its flagship UK public sector software and IT services (SITS) market report, forecasting growth every year through to 2029, while noting sharp divergence in pace between the largest players and the rest. The report covers rankings and analysis for the Top 20 suppliers — including IBM, Capgemini, CGI, Atos, Fujitsu, Capita, and Deloitte — and identifies six key trends from tightening budgets to the shift from AI pilots to production. Notably, one long-standing Top 20 name dropped out of the rankings altogether.","url":"https://www.techmarketview.com/news/archive/2026/08/03/new-research-uk-public-sector-sits-suppliers-trends-forecasts-2026","sentiment":0.1},{"date":"2026-07-31","company":"Atos / Eviden","headline":"Atos UK&I Delivers Third Consecutive Quarter of Growth with 7.1% Organic Revenue Uplift","summary":"Atos UK&Ireland continued its positive momentum, reporting a third consecutive quarter of organic revenue growth at 7.1%, backed by a strong 10.4% operating margin. H1 2026 revenue for the UK&I region reached €606m. The results reinforce the division as a stable performer within the broader Atos group restructuring, with public sector work continuing to anchor the portfolio.","url":"https://www.techmarketview.com/news/archive/2026/07/30/ukhotviewsextra-atos-uki-three-quarters-of-growth-and-counting","sentiment":0.65},{"date":"2026-07-31","company":"Capgemini","headline":"Capgemini UK&I Up 21% in H1 FY2026, Backed by £500m HMRC Contract Win and Strong Public Sector Demand","summary":"Capgemini UK&Ireland posted 21.1% revenue growth in H1 FY2026, reaching €893m in Q2 alone, driven by strong public sector demand and acquisitions of WNS and Cloud4C. The period included the landmark £500m HMRC Contact Centre as a Service contract win, alongside deals at National Highways and BAE Systems. Operating margin held steady at 18.1% and full-year guidance was raised to 8.5–9.0%.","url":"https://www.techmarketview.com/ukhotviews/archive/2026/07/30/capgemini-uk-up-21-in-h1","sentiment":0.7},{"date":"2026-07-31","company":"Fujitsu","headline":"Post Office Horizon Replacement Delayed a Sixth Time as Subpostmasters Accuse Fujitsu of Checking Out","summary":"The Post Office has extended the standstill period on the Horizon replacement contract—now delayed for a sixth time—to 21 August, with sources suggesting losing bidder Escher is challenging the award. Subpostmasters report a marked deterioration in Horizon performance, accusing Fujitsu of taking its foot off the gas since losing the contract. The UK Government said it continues to monitor Horizon to ensure it remains safe and reliable while the transition to a new system proceeds.","url":"https://www.computerweekly.com/news/366646732/Subpostmasters-anxious-over-Horizon-replacement-as-it-is-delayed-yet-again","sentiment":-0.7},{"date":"2026-07-30","company":"Atos/Eviden","headline":"Atos UK & Ireland Posts 7.1% Revenue Growth in H1 2026, Driven by Government Client Momentum","summary":"Atos Group's UK & Ireland business delivered revenues of €606 million in H1 2026, up 7.1% organically year-on-year, with Q2 accelerating to 9% organic growth. The strong performance was driven by increased adoption of offerings among existing government clients and new accretive revenue. Operating margin improved to 10.4% (+2.7 pts), making UK & Ireland the group's strongest-performing region. Atos confirmed its full-year 2026 targets with the UK as a key growth engine.","url":"https://www.globenewswire.com/news-release/2026/07/30/3335769/0/en/atos-group-h1-2026-results-strong-first-half-performance-building-on-sustained-delivery-on-track-to-achieve-full-year-targets.html","sentiment":0.75},{"date":"2026-07-30","company":"CGI","headline":"CGI UK Holds Steady in Q3 FY2026 with Five-Quarter Margin Uptrend","summary":"CGI's UK and Australia segment delivered Q3 FY2026 revenue of CAN$585.1 million, up 2.5% (1.6% constant currency), with EBIT margin rising to 16.1% from 13.7% a year ago — the fifth consecutive quarter of margin improvement. UK public sector work continues to underpin performance. Growth has normalised following the BJSS acquisition entering both comparable periods; CGI is now converting BJSS consulting contracts into longer-term managed services arrangements.","url":"https://www.techmarketview.com/news/archive/2026/07/29/ukhotviewsextra-cgi-q3-fy2026-uk-holds-up-as-growth-slows-across-the-group","sentiment":0.35},{"date":"2026-07-30","company":"Capgemini","headline":"Capgemini UK & Ireland Surges 21% as Group Upgrades Full-Year 2026 Outlook","summary":"Capgemini reported H1 2026 group revenues of €12.1 billion (+8.8%), upgrading its full-year constant-currency growth target to +8.5–9.0%. The UK & Ireland region was the standout performer, growing 21.1% at constant exchange rates, driven by strong Public Sector and Consumer Goods & Retail traction. The UK & Ireland operating margin held at 18.1%, the group's highest regional margin. CEO Aiman Ezzat cited robust demand for AI-driven defence and sovereignty solutions as a key growth driver.","url":"https://finance.yahoo.com/markets/stocks/articles/capgemini-upgrades-2026-outlook-050000827.html","sentiment":0.8},{"date":"2026-07-30","company":"PA Consulting","headline":"PA Consulting Replaces Google on Government AI Tutoring Pilot for Disadvantaged Pupils","summary":"PA Consulting Services has joined the Department for Education's AI Tutoring Pioneer Group after Google UK was removed following a commercial terms dispute. The contract slot, worth £360,000 including VAT, forms part of a pilot targeting up to 450,000 disadvantaged pupils in Years 9 and 10, with national rollout planned for 2027. The pilot faces structural uncertainty following PM Burnham's Whitehall reshuffle, which dissolved DSIT and transferred its AI delivery functions across three departments.","url":"https://www.techmarketview.com/ukhotviews/archive/2026/07/29/google-dropped-from-dfes-ai-tutoring-pilot-replaced-by-pa-consulting","sentiment":0.45},{"date":"2026-07-29","company":"Fujitsu","headline":"UK Public Does Not Trust Fujitsu, But Government Continues to Award Contracts","summary":"Despite 95% of respondents in a Daily Mail poll saying Fujitsu should be blacklisted after the Post Office Horizon scandal, the government has placed it on four major procurement frameworks worth over £54bn — including G-Cloud 15, Technology Services 4, Transport Technology and Digital Outcomes and Specialists 7. Parliament's Business and Trade Committee has written to the Secretary of State demanding clarity on how Fujitsu's participation in these frameworks accords with its stated self-imposed moratorium on bidding for new government contracts.","url":"https://www.computerweekly.com/news/366646332/UK-Public-dont-trust-Fujitsu-but-government-does","sentiment":-0.7},{"date":"2026-07-28","company":"PA Consulting","headline":"PA Consulting Replaces Google as UK Government AI Tutoring Provider for Schools","summary":"The UK Department for Education has quietly dropped Google from its AI tutoring pilot scheme and added PA Consulting as a replacement provider. The government programme, which aims to support disadvantaged pupils through AI-powered tutoring tools, will now see PA Consulting deliver services that Google had previously been part of. The change signals a shift toward specialist public sector consultancies in high-profile government EdTech initiatives.","url":"https://schoolsweek.co.uk/google-no-longer-helping-government-develop-ai-tutoring-tools-for-schools/","sentiment":0.6},{"date":"2026-07-27","company":"Fujitsu","headline":"Fujitsu Secures £61 Million HMRC Contract Despite Lingering Horizon Post Office Scandal","summary":"Fujitsu has secured a £61 million IT contract with HM Revenue and Customs (HMRC), sparking political outrage as the firm continues to hold government contracts worth an estimated £500 million while contributing nothing to the £1.8 billion Post Office Horizon scandal compensation fund. The contract ensures Fujitsu provides critical IT infrastructure and support to HMRC. Lawmakers and victims' advocates have condemned the government for continuing to award contracts to the firm responsible for the largest miscarriage of justice in British legal history.","url":"https://streamlinefeed.co.ke/news/fujitsu-secures-61-million-hmrc-contract-horizon-post-office-scandal-2026","sentiment":-0.75},{"date":"2026-07-26","company":"Fujitsu","headline":"Horizon Post Office Scandal: Police Investigation Faces Funding Crisis as Final Report Delayed Again","summary":"Operation Olympos, the police investigation into the Post Office Horizon scandal implicating Fujitsu, is warning of timeline slippage without urgent funding — the estimated cost for 2026/7 is £19.3 million. Commander Stephen Clayman aims to almost double his team from 111 to 210 investigators but funding remains unconfirmed. The Public Inquiry final report, which references persons of interest including Fujitsu, has been delayed again and may not be published until early 2027. Fujitsu has still contributed not a single pound to the £1.8 billion compensation fund despite making public statements of moral obligation.","url":"https://labourhub.org.uk/2026/07/26/the-horizon-post-office-scandal-what-next/","sentiment":-0.8},{"date":"2026-07-24","company":"Deloitte","headline":"Deloitte Launches \"Flying High\" UK Aerospace & Defence Policy Paper at Farnborough","summary":"Deloitte UK published a major policy paper titled \"Flying high: Driving innovation, resilience and growth of UK aerospace\" at the Farnborough International Airshow, calling for strategic government investment to build aerospace resilience and drive innovation. The paper positions AI adoption as a key strategic shift for the sector and signals Deloitte's advisory ambitions in the UK defence and aerospace supply chain. Farnborough 2026 confirmed a clear pivot toward AI-led transformation across the government-backed aerospace sector.","url":"https://www.instagram.com/reel/DbIelSliE5G/","sentiment":0.4},{"date":"2026-07-23","company":"Atos/Eviden","headline":"Eviden Showcases UK Defence & Intelligence Capabilities at DCIIS 2026","summary":"Eviden, the digital technology division of the Atos Group, participated in DCIIS 2026 — a UK defence, cyber and intelligence sector conference — demonstrating its security and digital capabilities to government and defence clients. The company reported strong engagement at the event, with 56% of attendees initiating new business discussions. The appearance reinforces Eviden's strategy to grow its UK public sector and defence portfolio following its rebranding from Atos.","url":"https://www.instagram.com/p/DbGrQ_AjI1L/","sentiment":0.3},{"date":"2026-07-23","company":"CGI","headline":"CGI Director Calls for Mandatory SME Participation in UK Government Contracts","summary":"Sonya Anderson, CGI's Director of Central Government, published a thought leadership piece on TechUK arguing that SME inclusion must be mandated and measured in all government procurement from the outset, not treated as a compliance exercise. Drawing on CGI research showing only 11% of central government procurement goes directly to SMEs, she calls for primes and SMEs to co-design solutions with departments, with direct communication lines at all delivery stages. The article positions CGI as a forward-thinking prime in the UK's evolving public sector market.","url":"https://www.techuk.org/resource/sharing-to-succeed-from-targets-to-outcomes-how-collaboration-between-primes-and-smes-can-unlock-government-s-sme-ambitions.html","sentiment":0.2},{"date":"2026-07-23","company":"Capita","headline":"MPs Debate Capita Pension Crisis as Cabinet Office Confirms Insourcing Plan","summary":"On 22 July, MPs raised urgent questions in Parliament about Capita's ongoing failure to administer the £239m Civil Service Pension Scheme, with MP Paul Yeats stating constituents had been left without their pensions. The Cabinet Office confirmed it is actively planning to bring the scheme back in-house, having cited Capita's repeated failure to meet service standards and its missed end-of-June recovery deadline. This follows Capita having already lost the Teachers' Pensions and Royal Mail statutory pension contracts for similar failings.","url":"https://www.aol.co.uk/articles/retired-uk-civil-servants-failed-050047000.html","sentiment":-0.8},{"date":"2026-07-23","company":"IBM","headline":"IBM Expert Analyses New Government Commercial Agency Impact on UK Tech Suppliers","summary":"IBM's Giles Hartwright, Public Sector Consulting Associate Partner, published a TechUK guest piece examining the transition from Crown Commercial Service (CCS) to the new Government Commercial Agency (GCA). The article highlights structural changes to how government procures tech services and what suppliers must do to succeed under the new commercial model. IBM's proactive engagement in shaping the debate positions the firm as a key thought leader during this significant shift in UK government procurement strategy.","url":"https://www.techuk.org/resource/sharing-to-succeed-from-ccs-to-gca-what-has-really-happened-to-govts-commercial-function.html","sentiment":0.2},{"date":"2026-07-22","company":"Capita","headline":"Pressure mounting on Government to pause Capita Synergy contract","summary":"Following a damning MPs' report on the Government's Shared Services Strategy, the PCS union is calling for the Government to pause Capita's £370m Synergy contract serving over 250,000 civil servants' payroll and HR. The report raises serious concerns about Capita's suitability, citing its poor track record across multiple government contracts. The union warns that awarding major public-sector contracts to Capita — despite ongoing pension scheme failures — sets a dangerous precedent.","url":"https://www.pcs.org.uk/news-events/news/pressure-mounting-government-pause-synergy-contract","sentiment":-0.8},{"date":"2026-07-22","company":"IBM","headline":"UK government scraps DSIT: Burnham signals sweeping end to outsourcing era","summary":"New PM Andy Burnham is abolishing the Department for Science, Innovation and Technology (DSIT) after just two years, redistributing digital-government responsibilities to a reborn DCMS and a new Department for Business, Innovation, Science and Trade. The Government Digital Service and Central Digital and Data Office will move to DCMS. Burnham has simultaneously criticised \"an outsourced state with little accountability,\" promising to bring government IT contracts back in house — a direct threat to major public-sector IT suppliers including IBM, Capgemini, Deloitte, CGI, and others.","url":"https://www.theregister.com/public-sector/2026/07/21/ukgovs-tech-department-gets-the-chop-after-two-years/5275573","sentiment":-0.4},{"date":"2026-07-21","company":"Atos/Eviden","headline":"Capita pension fallout puts Atos UK public sector contracts under scrutiny","summary":"The government's growing appetite for insourcing — accelerated by Capita's failures on the civil service pension scheme — has drawn attention to Atos's own public sector exposure in the UK. Analysts note that Atos holds significant UK government contracts, and a structural shift toward insourcing could threaten its revenue base. The Capita situation has sharpened investor and government focus on all major outsourcing suppliers.","url":"https://simplywall.st/stocks/us/software/nyse-dxc/dxc-technology/news/capita-fallout-puts-dxc-atos-uk-public-sector-exposure-in-th","sentiment":-0.4},{"date":"2026-07-21","company":"Capita","headline":"Government admits Capita has failed civil service pension scheme, plans insourcing","summary":"The UK government has admitted that outsourcing the civil service pension scheme to Capita was a failure, with some retired civil servants waiting up to a year for payments. Cabinet Office minister Nick Thomas-Symonds confirmed the government is now actively planning to bring the scheme back in-house, describing it as a prime candidate for insourcing in what he called \"the biggest wave of insourcing in a generation.\" The scheme was managed by myCPA, a Capita subsidiary.","url":"https://www.theguardian.com/business/2026/jul/20/retired-uk-civil-servants-failed-pension-outsourcing-government-capita","sentiment":-0.7},{"date":"2026-07-17","company":"Capita","headline":"Ofsted Chair to Lead Independent Review into Capita SATs Marking Fiasco","summary":"The government has launched an independent review, led by Ofsted chair Christine Gilbert, into serious failings in Capita's management of the 2026 KS2 SATs marking process. Results were delivered nine days late (16 July instead of 7 July), prompting widespread disruption. This is Capita's first year running the £180m SATs contract, and the government stated it would use all contractual provisions to hold Capita accountable for the failures.","url":"https://schoolsweek.co.uk/ofsted-chair-to-lead-review-into-sats-marking-fiasco/","sentiment":-0.75},{"date":"2026-07-17","company":"Capita","headline":"Secondary Schools Locked Out of Scaled SATs Scores Until Friday Amid Capita Contract Failures","summary":"Secondary schools across England were unable to access the scaled Key Stage 2 SATs scores needed for Year 7 setting and transition planning, with access delayed until Friday 18 July. Education leaders described the situation as showing a \"complete lack of understanding\" of the data's importance, compounding the already controversial result delays caused by Capita's operational failures under its £180m SATs marking contract.","url":"https://schoolsweek.co.uk/secondary-schools-shut-out-of-scaled-sats-scores-until-friday/","sentiment":-0.65},{"date":"2026-07-17","company":"Capita","headline":"PAC Warns £1.15bn Government Shared Services Programme at Risk, Questions Capita Suitability","summary":"The Public Accounts Committee has warned that the government's Shared Services strategy risks becoming a costly failure, explicitly questioning Capita's suitability to deliver a £370m HR and payroll contract for 250,000 civil servants. The PAC also flagged concerns about IBM and Oracle's £711m Synergy ERP contract and Deloitte's £120m Unity SI contract, citing lack of accountability, unproven value for money, and unexplained delays. It called for urgent reassessment of whether the programme should continue.","url":"https://www.techmarketview.com/ukhotviews/archive/2026/07/16/pac-casts-doubt-over-government-shared-services","sentiment":-0.6},{"date":"2026-07-15","company":"Capita","headline":"Capita Wins Role in £2bn British Army Collective Training Programme","summary":"Capita has been selected to join the Omnia Training consortium, led by Raytheon UK, to deliver the British Army's new Collective Training System under a 15-year, £2 billion contract. Capita expects to receive approximately £54 million for providing training support services including strategic needs analysis, scheduling coordination, and performance evaluation. The award builds on Capita's existing work supporting Royal Navy training and the Army Adventurous Training programme.","url":"https://uk.finance.yahoo.com/news/capita-wins-role-2bn-british-072603819.html","sentiment":0.65},{"date":"2026-07-15","company":"Fujitsu","headline":"UK Government Publishes £551m Plan to Exit Fujitsu Horizon Contract","summary":"The UK Government has published the Post Office Future Technology Portfolio Summary Business Case — a £551.8 million programme to modernise the Post Office's technology estate over five years. Central to the plan is the \"Fujitsu Exit\" programme, which will transition the scandal-tainted Horizon system away from Fujitsu UK using competitive tendering across two lots. DBT funding of £289.9 million is approved for FY2026-28, with the full programme valued at approximately £1.4 billion.","url":"https://www.gov.uk/government/publications/post-office-future-technology-portfolio-summary-business-case/summary-business-case","sentiment":-0.35},{"date":"2026-07-14","company":"Capita","headline":"Government Still Waiting for Capita Technology Rectification Plan in Whitehall Pensions Crisis","summary":"MPs and senior Cabinet Office officials have warned that restoring the Civil Service Pension Scheme to normal service levels will take several more months, as Capita is expected to miss 16 of 21 key performance indicators this month. Cabinet Office permanent secretary Cat Little told Parliament that Capita was supposed to deliver a Microsoft Power BI analytics platform from day one but failed to do so, and the government is still waiting for a credible technology rectification plan. Capita is due to submit that plan on 14 July, with commitments to restore some service categories by 1 September and complex cases by October, subject to independent audit.","url":"https://www.publictechnology.net/2026/07/13/business-and-industry/government-still-waiting-for-capita-technology-rectification-plan-in-whitehall-pensions-crisis/","sentiment":-0.8},{"date":"2026-07-14","company":"Deloitte","headline":"Irish Government's €102.8m Deloitte Bill Branded Absolutely Shocking by Opposition TDs","summary":"Ireland's Department of Social Protection spent €102.8m on Deloitte consultancy and IT services between 2020 and 2025, with expenditure peaking at €22.2m in 2024 for web services, digital product development, production support, and MyGovID ICT support. Social Democrats TD Eoin Hayes described the spending as 'absolutely shocking', saying the State is 'essentially outsourcing its ordinary business to private interests' and called for an audit of all external firms used by the department. The department defended the spending, saying it is one of the largest IT organisations in the State and that expenditure on ICT is an investment in assuring its social protection systems work efficiently.","url":"https://www.irishexaminer.com/news/politics/arid-41877548.html","sentiment":-0.6},{"date":"2026-07-14","company":"Fujitsu","headline":"Book Review Highlights Fujitsu Has Not Provided Compensation Despite Moral Obligation Over UK Post Office Horizon Scandal","summary":"A newly published book on the UK Post Office Horizon scandal highlights that Fujitsu has apologised but still has not provided direct financial compensation to affected sub-postmasters, despite publicly acknowledging a 'moral obligation' to do so. The scandal saw hundreds of sub-postmasters wrongly prosecuted due to flaws in Fujitsu's Horizon software, and nearly £1.6bn in government redress has been paid to over 11,000 claimants while Fujitsu has yet to contribute. The Horizon IT inquiry final report is expected shortly, which may determine what, if any, financial contribution Fujitsu will ultimately make.","url":"https://japannews.yomiuri.co.jp/culture/books-literature/20260713-337912/","sentiment":-0.7},{"date":"2026-07-13","company":"Capita","headline":"MOD awards Omnia Training consortium £2bn contract for AI-based training and analytics","summary":"The UK Ministry of Defence has awarded a £2 billion, 15-year contract to Omnia Training — a consortium led by Raytheon UK and including Capita, Cervus, Rheinmetall UK, and Skyral. The contract will deploy AI, advanced analytics and virtual environments to train up to 60,000 soldiers per year under the Army's Collective Training Service programme. Around 270 skilled roles will be created and 100 apprenticeships developed, with Defence Secretary Dan Jarvis citing the deal as central to the UK's £298bn four-year defence investment plan.","url":"https://www.insidermedia.com/news/national/mod-awards-consortium-2bn-contract-for-ai-based-training-and-analytics","sentiment":0.85},{"date":"2026-07-10","company":"Capita","headline":"Capita to lose money on pension debacle but has government's private parts in its grip","summary":"At a joint PAC/PACAC parliamentary hearing, Capita's CEO admitted the AI-automation technology intended for the Civil Service Pension Scheme (CSPS) failed entirely, leaving the company set to make no money on its £239m contract as the government withholds payments for 16 of 21 missed KPIs. MPs sharply questioned whether Capita — holding 85 public sector contracts — has government 'firmly in its grip', while the Cabinet Office confirmed it will recoup £12.5m in surge-team costs 'to the penny' and flagged the contract as a prime candidate for insourcing.","url":"https://www.computerweekly.com/news/366645700/Capita-to-lose-money-on-pension-debacle-but-has-governments-private-parts-in-its-grip","sentiment":-0.9},{"date":"2026-07-09","company":"CGI","headline":"CGI adds geospatial data role at HM Land Registry","summary":"CGI has won HM Land Registry's Strategic Data Partner contract, worth up to £14.1m over five years starting 1 July 2026. The geospatial-focused role spans data strategy, advanced analytics, innovation, architecture, governance and data integration. The win extends CGI's run of UK central government successes following recent contracts with the Cabinet Office, HMRC and HMCTS.","url":"https://www.techmarketview.com/ukhotviews/archive/2026/07/08/cgi-adds-geospatial-data-role-at-hm-land-registry","sentiment":0.7},{"date":"2026-07-09","company":"Capita","headline":"Capita CEO tells MPs firm will not stop until civil service pension failures are fixed","summary":"Capita's chief executive faced a parliamentary committee hearing over the company's handling of the Civil Service Pension Scheme contract, where failures have affected thousands of public sector workers. The CEO pledged remediation but MPs pressed hard for accountability and a firm timeline for resolution. Capita also issued a formal statement on the contract alongside the hearing.","url":"https://www.irishnews.com/news/uk/capita-will-not-stop-until-civil-service-failures-fixed-boss-tells-MPs/","sentiment":-0.4},{"date":"2026-07-09","company":"Fujitsu","headline":"Post Office Horizon replacement contract delayed for the fourth time","summary":"The formal signing of the contract to replace Fujitsu's controversial Horizon system has been delayed for the fourth time, now pushed to 17 July. OneView Commerce remains the successful bidder for the EPOS lot, while Accenture's Lot 1 contract was signed off without issue. Repeated delays may indicate a legal challenge against the award, according to sources.","url":"https://www.computerweekly.com/news/366645716/Post-Office-Horizon-replacement-contract-delayed-further","sentiment":-0.3},{"date":"2026-07-08","company":"Capita","headline":"Capita Shares Slump 15% as Paymaster General Condemns Civil Service Pension Failures","summary":"Capita shares fell up to 16% on Tuesday after Paymaster General Nick Thomas-Symonds delivered a scathing Commons statement, accusing the firm of \"corporate failure\" in its administration of the Civil Service Pension Scheme. With 4,100 bereavement cases and 6,700 retirement quotations still outstanding, the government has withheld nearly £10m in payments and is actively assessing whether to insource the £239m contract entirely.","url":"https://uk.finance.yahoo.com/news/capita-apologises-civil-pension-failures-084944001.html","sentiment":-0.9},{"date":"2026-07-08","company":"Deloitte","headline":"UK Government Launches National Cyber Resilience Pledge at Downing Street; Deloitte Joins as Founding Signatory","summary":"The UK government launched its National Cyber Resilience Pledge at 10 Downing Street on 7 July, with over 60 major UK firms committing to board-level cyber governance, NCSC tool adoption, and supply-chain security. Deloitte LLP joined as a founding signatory — alongside M&S, Nationwide, and Microsoft UK — as a strategic government supplier, underpinning the National Cyber Action Plan to address the £14.7bn annual cost of cyber attacks on UK businesses.","url":"https://www.gov.uk/government/news/businesses-across-britain-sign-up-to-cyber-resilience-pledge-as-ministers-urge-firms-to-strengthen-cyber-defences","sentiment":0.6},{"date":"2026-07-08","company":"Fujitsu","headline":"UK Government Commits £483m to Post Office Technology Transformation, Accelerates Horizon Exit from Fujitsu","summary":"The Department for Business and Trade published its formal response to the Post Office Green Paper on 7 July 2026, committing up to £483m over two years to modernise the Post Office network. A central pillar is a Technology Transformation Programme to transition Horizon operations away from Fujitsu UK to newly procured service partners as soon as possible, signalling the formal end of Fujitsu's long-term role in the Post Office's core IT infrastructure.","url":"https://www.gov.uk/government/consultations/green-paper-future-of-post-office/outcome/government-response-future-of-the-post-office","sentiment":-0.4},{"date":"2026-07-07","company":"Capita","headline":"Capita Faces Public Accounts Committee and Street Protest as Civil Service Pension Crisis Deepens","summary":"Capita appeared before the Public Accounts Committee on 7 July as PCS union members staged a demonstration outside Old Palace Yard over the firm's persistent failures administering the Civil Service Pension Scheme. The Cabinet Office had previously declared Capita 'completely failed' to meet its end-of-June recovery deadline under the £239m contract. With future insourcing now openly discussed by government, scrutiny of Capita's performance is at its most intense since the crisis began.","url":"https://www.pcs.org.uk/news-events/news/union-solidarity-round-6-12-july","sentiment":-0.8},{"date":"2026-07-03","company":"CGI","headline":"CGI IT Wins £14.1m HM Land Registry Strategic Data Partnership","summary":"HM Land Registry has awarded CGI IT a four-year, £14.1m contract to serve as its Strategic Data Partner, supporting the agency's data transformation programme. The contract covers geospatial strategy, advanced capabilities, data governance and capability building, running from July 2026 to June 2030. It was procured via the DPS RM6235 Spaced Enabled Geospatial Services framework, with an optional one-year extension available.","url":"https://bidstats.uk/tenders/2026/W27/873726057","sentiment":0.7},{"date":"2026-07-03","company":"CGI","headline":"CGI IT Wins £14.1m HM Land Registry Strategic Data Partnership","summary":"HM Land Registry has awarded CGI IT a four-year, £14.1m contract to serve as its Strategic Data Partner, supporting the agency's data transformation programme. The contract covers geospatial strategy, advanced capabilities, data governance and capability building, running from July 2026 to June 2030. It was procured via the DPS RM6235 Spaced Enabled Geospatial Services framework, with an optional one-year extension available.","url":"https://bidstats.uk/tenders/2026/W27/873726057","sentiment":0.7},{"date":"2026-07-03","company":"Capgemini","headline":"Capgemini secures 36m National Highways contract","summary":"Capgemini UK appointed as National Highways Service Management Maturity partner on five-year contract worth 35.9m (ceiling 47.2m), running July 2026 to June 2031. The contract covers IT and OT service management and includes knowledge transfer obligations to build in-house capability within National Highways. The win extends Capgeminis transport sector presence alongside existing National Highways IT framework suppliers.","url":"https://www.techmarketview.com/ukhotviews/archive/2026/07/02/capgemini-secures-36m-national-highways-contract","sentiment":0.7},{"date":"2026-07-03","company":"Capita","headline":"Government admits Capita is a prime candidate for insourcing after pension chaos","summary":"A government minister admitted in a House of Lords debate that Capita has \"completely failed\" to restore normal service levels to the Civil Service Pension Scheme, after the outsourcer missed a Cabinet Office deadline of 30 June. The minister described the pension scheme as \"a prime candidate for future insourcing once immediate operational stability is secured,\" signalling serious doubt over Capita's long-term hold on the £239m contract. PCS union is calling for the contract to be insourced immediately and Capita to be barred from future awards.","url":"https://www.pcs.org.uk/news-events/news/government-admits-capita-prime-candidate-insourcing","sentiment":-0.85},{"date":"2026-07-02","company":"Capgemini","headline":"Capgemini Secures £36m National Highways Service Management Contract","summary":"Capgemini UK has been appointed National Highways' Service Management Maturity partner on a five-year contract worth £35.9m (ceiling £47.2m), running 1 July 2026 to 30 June 2031. The deal covers both IT and OT service management and includes explicit knowledge transfer objectives to build sustainable in-house capability within National Highways. It was awarded as a call-off from the National Highways IT Commercial Framework (ITCF).","url":"https://www.techmarketview.com/ukhotviews/archive/2026/07/02/capgemini-secures-36m-national-highways-contract","sentiment":0.7},{"date":"2026-07-02","company":"Capgemini","headline":"Capgemini Secures £36m National Highways Service Management Contract","summary":"Capgemini UK has been appointed National Highways' Service Management Maturity partner on a five-year contract worth £35.9m (ceiling £47.2m), running 1 July 2026 to 30 June 2031. The deal covers both IT and OT service management and includes explicit knowledge transfer objectives to build sustainable in-house capability within National Highways. It was awarded as a call-off from the National Highways IT Commercial Framework (ITCF).","url":"https://www.techmarketview.com/ukhotviews/archive/2026/07/02/capgemini-secures-36m-national-highways-contract","sentiment":0.7},{"date":"2026-07-02","company":"Capita","headline":"Capita Launches Forward Deployed Orchestrator to Turn Agentic AI into Operational Value","summary":"Capita has launched the Forward Deployed Orchestrator™ (FDO), a new AI operating model that embeds an \"AI-fluent process and change specialist\" directly inside client operations to own sustained AI performance after go-live. The model is explicitly positioned to compete for UK Government programmes such as the DBT AI³ contract. Early results include saving over 1,000 management hours in four months and cutting candidate screening time by 43% in an internal deployment using Salesforce Agentforce.","url":"https://www.capita.com/news-and-insights/news/2026/Capita-launches-forward-deployed-orchestrator-turn-agentic-ai-measurable-value","sentiment":0.65},{"date":"2026-07-02","company":"Deloitte","headline":"Home Office splits £350m data deal between Deloitte and PA Consulting","summary":"The UK Home Office has committed up to £350m to enhance its Data Services and Analytics (DSA) unit, awarding Lot A (capped at £200m) to Deloitte via the Digital Specialists and Programmes framework. Signed in late May 2026, the four-year contract sees Deloitte provide integrated data teams to implement the Home Office data strategy, including standardising and integrating existing functionality from related programmes. This consolidates Deloitte's deep Home Office account and follows a recent £132m win and an HMRC data discovery contract.","url":"https://www.techmarketview.com/ukhotviews/archive/2026/07/01/home-office-splits-350m-data-deal-between-deloitte-and-pa-consulting","sentiment":0.8},{"date":"2026-07-02","company":"Fujitsu","headline":"Post Office Horizon Compensation Postcode Lottery Exposed — Advisory Board Urges Government Action","summary":"The Horizon Compensation Advisory Board has written to the government urging action on three groups of Post Office Horizon scandal victims (built on Fujitsu's IT system) who are being treated differently in Scotland versus England and Wales. Issues include DWP-prosecuted subpostmasters, refused pre-2024 Court of Appeal cases, and Capture-system convictions. The letter was sent on 16 June but has yet to receive a reply, described as being \"in the Burnham black hole.\"","url":"https://www.postofficescandal.uk/post/horizon-compensation-advisory-board-come-out-swinging/","sentiment":-0.5},{"date":"2026-07-02","company":"PA Consulting","headline":"PA Consulting wins £150m Home Office Data Professions contract in shared £350m award","summary":"PA Consulting has secured Lot B of the Home Office's £350m Data Services and Analytics contract, valued at up to £150m over four years, supplying specialist data professionals and teams to the department. This extends PA's remarkable public sector run since January 2026, during which the firm has won contracts from the Department for Transport, Ministry of Defence, National Armaments Director Group, and multiple Home Office engagements worth well over £200m in total.","url":"https://www.techmarketview.com/ukhotviews/archive/2026/07/01/home-office-splits-350m-data-deal-between-deloitte-and-pa-consulting","sentiment":0.85},{"date":"2026-07-01","company":"Capgemini","headline":"HMRC selects Capgemini, NICE and Route 101 for customer service transformation","summary":"HMRC has selected Capgemini alongside NICE and Route 101 to deliver its next-phase customer experience transformation programme, introducing NICE's CXone cloud contact centre platform across HMRC's customer service operations. The contract replaces legacy technology with AI-enabled capabilities designed to improve both citizen and adviser experiences, including digital channels, enhanced call routing and automation. The deal represents a significant central government investment in modernising citizen services through cloud technology and AI.","url":"https://www.thinkdigitalpartners.com/news/2026/06/30/uk-digital-procurement-roundup-june-2026-contracts-frameworks-and-market-moves/","sentiment":0.8},{"date":"2026-07-01","company":"Capita","headline":"Capita makes partial progress on Civil Service Pension Scheme but misses full end-of-June recovery deadline","summary":"Capita can now process new retirees' pension requests with timely payment for those with a four-month lead time, marking partial progress in the Civil Service Pension Scheme crisis that began when Capita took over administration in December 2025. However, the retirement modeller remains unavailable with no launch timescale confirmed, and the PCS union stated Capita has missed its contractual end-of-June full recovery deadline. Cabinet Office taskforce head Angela MacDonald has promised a full recovery position update on 2 July.","url":"https://www.civilserviceworld.com/professions/article/angela-macdonald-capita-is-now-ready-to-pay-new-retirees-pensions-on-time","sentiment":-0.5},{"date":"2026-07-01","company":"Capita","headline":"Capita Misses Government Deadline to Deliver Full Terms of Civil Service Pensions Contract","summary":"Capita has officially missed the government's 30 June 2026 deadline to deliver the full requirements of its Civil Service Pensions (CSP) contract, according to the PCS trade union. Paymaster General Nick Thomas-Symonds had set the deadline in April 2026 following prior delivery failures. The PCS union has called on the government to take formal action against Capita, raising questions about the company's ability to meet its public sector obligations.","url":"https://www.professionalpensions.com/news/4532080/capita-misses-government-deadline-deliver-terms-csp-contract","sentiment":-0.7},{"date":"2026-07-01","company":"Capita","headline":"Capita Misses Government Deadline to Deliver Full Terms of Civil Service Pensions Contract","summary":"Capita has officially missed the government's 30 June 2026 deadline to deliver the full requirements of its Civil Service Pensions (CSP) contract, according to the PCS trade union. Paymaster General Nick Thomas-Symonds had set the deadline in April 2026 following prior delivery failures. The PCS union has called on the government to take formal action against Capita, raising questions about the company's ability to meet its public sector obligations.","url":"https://www.professionalpensions.com/news/4532080/capita-misses-government-deadline-deliver-terms-csp-contract","sentiment":-0.7},{"date":"2026-07-01","company":"Deloitte","headline":"Home Office Splits £350m Data Partnership Between Deloitte and PA Consulting","summary":"The Home Office has divided a major £350m data transformation partnership between Deloitte and PA Consulting, splitting the work across two specialist lots. Deloitte and PA Consulting were each awarded separate portions of the contract, reflecting the government's approach to reducing single-supplier dependency on large strategic data programmes. The deal represents one of the largest public sector data partnerships announced in 2026.","url":"https://www.techmarketview.com/ukhotviews/archive/2026/07/01/home-office-splits-350m-data-deal-between-deloitte-and-pa-consulting","sentiment":0.6},{"date":"2026-07-01","company":"Deloitte","headline":"Home Office Splits £350m Data Partnership Between Deloitte and PA Consulting","summary":"The Home Office has divided a major £350m data transformation partnership between Deloitte and PA Consulting, splitting the work across two specialist lots. Deloitte and PA Consulting were each awarded separate portions of the contract, reflecting the government's approach to reducing single-supplier dependency on large strategic data programmes. The deal represents one of the largest public sector data partnerships announced in 2026.","url":"https://www.techmarketview.com/ukhotviews/archive/2026/07/01/home-office-splits-350m-data-deal-between-deloitte-and-pa-consulting","sentiment":0.6},{"date":"2026-07-01","company":"Fujitsu","headline":"Post Office delays signing Horizon replacement contract for third time","summary":"The Post Office has delayed for a third time the formal signing of a £169.2m contract to replace Fujitsu's ageing Horizon EPOS system, which sits at the heart of the UK's largest ever miscarriage of justice scandal. No new signing date has been confirmed, meaning Fujitsu's Horizon system will continue operating beyond its original replacement timeline. The repeated delays raise questions about the Post Office's contract management capability as the public inquiry into the Horizon scandal continues.","url":"https://www.computerweekly.com/news/366645261/Post-Office-delays-signing-Horizon-replacement-for-third-time","sentiment":-0.5},{"date":"2026-07-01","company":"Fujitsu","headline":"Post Office reassesses Horizon replacement bids and reconfirms OneView Commerce — contract signing delayed to 8 July","summary":"After two prior delays, the Post Office formally reassessed bids for the £169.2m Horizon EPOS replacement contract and reaffirmed OneView Commerce as the successful supplier, with Escher Software losing out again. The formal contract signing has been pushed out to 8 July under an extended standstill period, indicating a possible supplier challenge. Fujitsu remains under contract to run Horizon until March 2027, having earned more than £2.5bn from the Post Office over 25-plus years on a system responsible for nearly 1,000 wrongful convictions.","url":"https://www.publictechnology.net/2026/07/01/business-and-industry/post-office-reassesses-bids-for-horizon-replacement-but-picks-same-supplier/","sentiment":-0.4},{"date":"2026-07-01","company":"PA Consulting","headline":"PA Consulting Shares £350m Home Office Data Deal with Deloitte","summary":"PA Consulting has secured a portion of the Home Office's £350m data transformation contract, splitting the award with Deloitte across two specialist lots. The contract underscores PA Consulting's continued strong positioning in UK government data and analytics advisory services. This win adds to PA Consulting's growing public sector portfolio and reinforces its role as a key data partner for major government departments.","url":"https://www.techmarketview.com/ukhotviews/archive/2026/07/01/home-office-splits-350m-data-deal-between-deloitte-and-pa-consulting","sentiment":0.6},{"date":"2026-07-01","company":"PA Consulting","headline":"PA Consulting Shares £350m Home Office Data Deal with Deloitte","summary":"PA Consulting has secured a portion of the Home Office's £350m data transformation contract, splitting the award with Deloitte across two specialist lots. The contract underscores PA Consulting's continued strong positioning in UK government data and analytics advisory services. This win adds to PA Consulting's growing public sector portfolio and reinforces its role as a key data partner for major government departments.","url":"https://www.techmarketview.com/ukhotviews/archive/2026/07/01/home-office-splits-350m-data-deal-between-deloitte-and-pa-consulting","sentiment":0.6},{"date":"2026-06-30","company":"Capita","headline":"Capita Issues 9,500 UK Pension Quotes Amid Severe Public Sector Backlog Crisis","summary":"The UK government has confirmed Capita issued 9,500 overdue retirement quotations from an initial backlog of 23,000 outstanding civil service pension quotes. Cabinet Office has imposed financial penalties and withheld payments to the contractor, while authorising emergency transitional loans of up to £20,000 for stranded retirees. An estimated 13,000 quotes remained unprocessed heading into the June 30 deadline, raising the risk of further contractual default.","url":"https://streamlinefeed.co.ke/news/capita-issues-9500-uk-pension-quotes-amid-severe-public-sector-backlog-crisis","sentiment":-0.8},{"date":"2026-06-30","company":"Deloitte","headline":"Economic Challenges Facing the New Prime Minister — Deloitte UK Monday Briefing","summary":"Deloitte UK Chief Economist Debapratim De analyses the fiscal and economic challenges awaiting incoming PM Andy Burnham, who is expected to succeed Keir Starmer. Key issues include record-high public spending at ~45% of GDP, limited borrowing headroom, the highest tax burden since the 1940s, and low public satisfaction with NHS and other services. Burnham has committed to the existing fiscal rules while exploring infrastructure investment and AI-led productivity gains.","url":"https://www.deloitte.com/uk/en/blogs/monday-briefing/economic-challenges-facing-the-new-prime-minister.html","sentiment":0},{"date":"2026-06-29","company":"Capita","headline":"Capita Civil Service Pension Recovery to Miss June 30 Deadline","summary":"The Cabinet Office has confirmed that Capita will not fully resolve the Civil Service Pension Scheme backlog by its June 30 recovery deadline, with around 6,500 retirement quotations still outstanding and thousands of bereavement cases unresolved. Second Permanent Secretary Angela MacDonald stated recovery work will continue beyond June and that focus remains on ensuring members receive entitled benefits. A joint Parliamentary Public Accounts Committee and Public Administration hearing has been scheduled for July 8 to hold Capita and the Cabinet Office to account for the ongoing crisis.","url":"https://www.cspa.co.uk/news/civil-service-pension-scheme-latest-recovery-update/","sentiment":-0.65},{"date":"2026-06-28","company":"Capita","headline":"'Dad died with nothing': Inside the Civil Service Pension Meltdown","summary":"The Times has published a harrowing account of Capita's ongoing failures managing the UK Civil Service Pension Scheme, which it took over in December 2025. Tens of thousands of civil servants and their families have suffered from delayed, incorrect, or missing pension payments — with one family reporting that a retiree died with nothing after payments were not processed. Despite a June 30 deadline that is expected to be missed, Capita has yet to resolve the systemic errors that have caused widespread financial and personal hardship.","url":"https://www.thetimes.com/money/pensions/article/civil-service-pension-meltdown-capita-failure-money-fmls8b2bq","sentiment":-0.85},{"date":"2026-06-27","company":"Deloitte","headline":"Deloitte Partners with Google Cloud to Drive UK Public Sector Agentic AI Adoption","summary":"TechMarketView's coverage of the Google Cloud London Summit (26 Jun 2026) highlights Deloitte as a leading partner in shaping how agentic AI is delivered for UK public sector organisations, with multiple announcements involving government clients. The summit marked a shift from AI pilots to production-grade agentic systems across Whitehall and wider public services. Deloitte's role spans strategy through to ground-level delivery, placing it at the centre of the UK's agentic AI transition.","url":"https://www.techmarketview.com/ukhotviews/archive/2026/06/26/new-research-google-cloud-summit-2026-agentic-ambition-meets-enterprise-reality","sentiment":0.45},{"date":"2026-06-27","company":"PwC","headline":"PwC Ireland Calls on Government to Use Budget 2027 as Platform for Innovation and Long-Term Growth","summary":"PwC Ireland has called on the Irish Government to use Budget 2027 as a strategic platform for long-term economic competitiveness, proposing measures across tax reform, clean energy investment, and housing delivery. The submission, issued 26 June 2026, positions PwC as a prominent voice in shaping Ireland's public finance priorities ahead of the autumn budget. Recommended measures aim to stimulate innovation, attract foreign investment, and support indigenous enterprise growth.","url":"https://www.thinkbusiness.ie/articles/pwc-budget-2027-ireland-innovation-energy-housing-growth/","sentiment":0.3},{"date":"2026-06-26","company":"CGI","headline":"CGI's MyCare.Scot NHS App Expands to Hospital Services Across Scotland","summary":"Scotland's digital health portal MyCare.Scot, delivered by CGI under a £27.8 million Scottish Government contract, is now expanding from an initial launch in dermatology outpatients to broader hospital-based services nationwide. The platform gives patients instant access to their health data and will eventually cover GP practices, pharmacy, social work and social care. The expansion marks a significant milestone in CGI's public sector digital health delivery portfolio in the UK.","url":"https://www.digitalhealth.net/2026/06/digital-health-coffee-time-briefing-%E2%98%95-178/","sentiment":0.5},{"date":"2026-06-26","company":"Capita","headline":"Capita Chaos Is Destroying Health and Finances of Civil Service Pension Members","summary":"The PCS civil service union has published harrowing testimonies from civil servants unable to access their pensions due to Capita's mishandling of the Civil Service Pension Scheme contract. The pension backlog grew 40% to 120,000 cases in just the first seven weeks of Capita's contract, leaving thousands forced to borrow money and drain savings. PCS is calling on members to lobby MPs and has scheduled a parliamentary rally on 7 July, intensifying political pressure on Capita's government contract performance.","url":"https://www.pcs.org.uk/news-events/news/capita-chaos-destroying-our-health-finances","sentiment":-0.8},{"date":"2026-06-26","company":"Fujitsu","headline":"Former Post Office Legal Boss Referred to Disciplinary Council Over Horizon Scandal","summary":"The UK Solicitors Regulation Authority (SRA) has referred the Post Office's former general counsel Jane MacLeod to a disciplinary tribunal for failing to give evidence at the statutory Horizon IT public inquiry. Fujitsu, as the supplier of the faulty Horizon system that led to over 900 wrongful prosecutions, faces continued reputational pressure as legal proceedings proliferate. The referral signals sustained government and regulatory scrutiny of the Post Office IT contractor ecosystem.","url":"https://www.computerweekly.com/news/366645057/Former-Post-Office-legal-boss-referred-to-disciplinary-council","sentiment":-0.5},{"date":"2026-06-25","company":"Deloitte","headline":"Home Office Expands Deloitte Contract for Online Application Services to Top £130m","summary":"The Home Office has awarded Deloitte a new five-year contract worth £131.65m to support its Apply for Things migration and borders services—covering visa and leave-to-remain applications—at an annual cost over 40% higher than the prior deal. The contract, running from September 2026 to August 2030 with an optional one-year extension, secures Deloitte access to a pool of skilled resources mobilisable at pace to deliver, develop and operate the digital application suite. Deloitte may continue to use nearshore delivery teams under the renewed arrangement.","url":"https://www.publictechnology.net/2026/06/24/international-relations/home-office-expands-contract-for-online-application-services-to-top-130m/","sentiment":0.7},{"date":"2026-06-24","company":"Capita","headline":"Capita Civil Service Pension Recovery: June 30 Deadline Likely to Be Missed","summary":"With 13,000 retirement quotations still outstanding as of 17 June, civil service unions have described the end-of-June recovery target as \"completely fanciful.\" The Cabinet Office-mandated deadline covers clearing backlogs affecting tens of thousands of civil service pensioners, with some bereaved beneficiaries still waiting nine months for pension payments. Parliamentary scrutiny of Capita's contract management and the Cabinet Office's oversight is scheduled for a joint PAC/PAAC session on 8 July.","url":"https://www.cspa.co.uk/news/june-deadline/","sentiment":-0.8},{"date":"2026-06-24","company":"Fujitsu","headline":"Fujitsu Still Collecting Government Contracts Despite Zero Contribution to Horizon Compensation","summary":"An i Paper analysis published in the wake of PM Starmer's resignation spotlights that Fujitsu has not contributed a single penny to the £2 billion Post Office Horizon compensation bill while continuing to hold UK government contracts. The firm's ongoing public sector contract relationships — maintained through \"existing customer\" exemptions to its own voluntary bidding pause — draw fresh scrutiny as a new interim government under David Lammy takes office and faces pressure to reassess procurement relationships with companies at the centre of the Horizon scandal.","url":"https://inews.co.uk","sentiment":-0.7},{"date":"2026-06-23","company":"Atos/Eviden","headline":"Eviden UK: No Major Public Sector Contract News This Week — Background Context","summary":"No significant UK or Ireland public-sector specific Eviden news was published in the last 7 days. Eviden (the technology-focused entity spun out of Atos Group's restructuring) continues to maintain UK government contracts in cybersecurity and digital infrastructure, but no new announcements surfaced in available sources this week. Monitoring continues via official channels and TechMarketView.","url":"https://atos.net/en/","sentiment":0},{"date":"2026-06-23","company":"Atos/Eviden","headline":"Atos invests in UK secure infrastructure to capture growing public sector IT market","summary":"Atos has established new UK-based data and AI infrastructure with military-grade security, as part of a strategic push by newly appointed UK CEO Michael Herron to grow the firm's public sector business. Atos currently holds 37 live UK public sector contracts worth £1.3bn, including major agreements with the MoD, HMRC, Home Office, and NSIB. The investment follows a £150m, five-year contract win with Defra in March 2025, signalling Atos's determination to expand its UK government footprint despite its parent group's financial restructuring in France.","url":"https://www.computerweekly.com/news/366632825/Frances-Atos-eyes-UK-public-sector-with-investment-in-secure-UK-infrastructure","sentiment":0.3},{"date":"2026-06-23","company":"CGI","headline":"CGI UK Delivers Borealis Satellite-Tracking System Six Months Ahead of Schedule","summary":"The UK MoD announced that Borealis — the country's new satellite threat-tracking software — has reached full operational capability six months ahead of schedule. Delivered by CGI UK under a £65 million five-year contract, the system fuses multi-sensor data to give the National Space Operations Centre a faster, more accurate picture of debris and adversary activity. Early delivery is a strong commercial signal and opens follow-on opportunities as the UK's space defence capability scales.","url":"https://www.strategical.org.uk/strategical-briefing/riat-2026-cancelled","sentiment":0.82},{"date":"2026-06-23","company":"CGI","headline":"CGI 2026 AI Research: Only 20% of Enterprises Extend AI Strategy Across the Ecosystem","summary":"CGI's global 2026 Voice of Our Clients research finds 62% of organisations are now applying AI to core processes, but only 20% have extended their AI strategy across the full enterprise ecosystem. The research draws on interviews with 2,000 business and IT executives including UK public sector clients. CGI positions this gap as a key opportunity for its managed services and AI integration offerings.","url":"https://www.stocktitan.net/news/GIB/c-suite-ai-adoption-is-rising-yet-ambition-is-outpacing-enterprise-1cjcqljno368.html","sentiment":0.2},{"date":"2026-06-23","company":"CGI","headline":"CGI awarded £250m HMRC Enterprise Integration Services contract to modernise IT estate","summary":"CGI has been awarded a contract worth up to £250 million over five years by HM Revenue & Customs to operate and maintain integration services across HMRC's IT estate. The contract deepens CGI's existing partnership with HMRC and supports the broader modernisation of government digital infrastructure. HMRC cited CGI's track record in mission-critical integration as a key reason for the award, which will help accelerate the delivery of improved digital services for UK taxpayers.","url":"https://www.cgi.com/en/cgi-awarded-250-million-enterprise-integration-services-contract-his-majesty-revenue-customs-uk","sentiment":0.72},{"date":"2026-06-23","company":"Capgemini","headline":"Capgemini Wins HMRC Migration Partner Role as First SAP Sovereign Cloud Partner","summary":"Capgemini has been appointed by HMRC as Migration Delivery Partner to modernise the UK's Enterprise Tax Management Platform — a critical system supporting 50+ tax regimes and processing over £875 billion annually. The win coincides with Capgemini becoming the world's first SAP Sovereign Cloud Partner, a designation covering the UK, France, Germany, and the Netherlands. Together, these announcements cement Capgemini's position at the top of UK public-sector digital transformation.","url":"https://www.capgemini.com/gb-en/news/press-releases/capgemini-becomes-first-to-receive-the-sap-sovereign-cloud-partner-designation/","sentiment":0.85},{"date":"2026-06-23","company":"Capgemini","headline":"HMRC signs £600m multi-year deal with Capgemini to digitise customer service with AI","summary":"HM Revenue & Customs has awarded a multi-year contract worth up to £600 million to Capgemini, NiCE, and Route 101 to overhaul its customer service operations via an AI-powered cloud contact centre. The deal aims to modernise taxpayer support and reduce operational costs as HMRC pushes its digital transformation agenda. CGI was on the shortlist but Capgemini secured the award, deepening its long-standing relationship with the UK's tax authority.","url":"https://www.capgemini.com/us-en/news/press-releases/capgemini-nice-and-route-101-to-meet-evolving-needs-of-uk-citizens/","sentiment":0.8},{"date":"2026-06-23","company":"Capita","headline":"Capita Confirmed to Miss June 30 Deadline to Fix Civil Service Pension Scheme","summary":"The Cabinet Office has confirmed that Capita will fail to meet the ministerial deadline of 30 June 2026 to restore the Civil Service Pension Scheme to contractual standards following a disastrous portal launch in December 2025. The PCS union — representing 1.5 million current and former civil servants — has called for the scheme to be brought back in-house, noting that 607 MPs have already received constituent complaints. Capita is under urgent government review and faces significant commercial consequences.","url":"https://www.theregister.com/public-sector/2026/06/16/capita-is-about-to-sail-past-deadline-to-fix-civil-service-pensions-scheme/5256022","sentiment":-0.8},{"date":"2026-06-23","company":"Capita","headline":"Capita and Salesforce Deliver Joint AI Solutions for UK Defence, Education and Enterprise","summary":"Capita has partnered with Salesforce to develop and deploy AI-enabled solutions targeting UK defence, education, and enterprise clients. The announcement (18 June 2026) is part of Capita's strategic repositioning as an AI-first business processing outsourcer, following its sale of the private-sector contact centre arm to Inspirit Capital. The move underlines Capita's intent to compete for technology-led public-sector transformation contracts.","url":"https://www.capita.com/news-and-insights/news/2026/capita-salesforce-ai-enabled-solutions-defence-education-enterprise","sentiment":0.35},{"date":"2026-06-23","company":"Capita","headline":"Capita secures decade-long £959m Synergy government contract for four major departments","summary":"Capita has been awarded the Synergy Business Process Services contract — worth £370m initially and up to £959m over 10 years — to deliver IT-enabled back-office services for the DWP, Ministry of Justice, Home Office, and Defra. The contract covers HR, payroll, recruitment, finance, procurement and service desk support, underpinned by hyperscale cloud. The win comes despite ongoing public scrutiny of Capita's performance on its civil service pension contract, highlighting the government's continued reliance on the outsourcing firm.","url":"https://www.computerweekly.com/news/366639758/Capita-secures-decade-long-government-contract-amid-failure-in-public-sight","sentiment":0.4},{"date":"2026-06-23","company":"Deloitte","headline":"Deloitte Launches London AI Studio with Google Cloud to Spearhead UK Agentic AI Transition","summary":"Deloitte opened a new AI Studio on its London campus in partnership with Google Cloud, designed to help UK organisations — including public sector bodies — move from AI experimentation to production-ready agentic systems. The studio will run four-week innovation sprints and host Deloitte's plan to certify 1,000 UK AI engineers on Google Gemini Enterprise. Public sector is explicitly named among the first focus industries.","url":"https://www.deloitte.com/uk/en/about/press-room/deloitte-and-google-cloud-collaborate-to-launch-london-ai-studio.html","sentiment":0.65},{"date":"2026-06-23","company":"Deloitte","headline":"Deloitte wins £132m Home Office contract despite government's consultancy spending crackdown","summary":"TechMarketView reports that Deloitte has secured a £132 million contract with the Home Office, a significant win even as the UK government pursues targets to halve consultancy expenditure and achieve £1.2bn in savings by 2026. The contract win demonstrates that flagship transformation programmes continue to attract major consulting firms despite public pressure on outsourcing spend. Deloitte's public sector practice remains a top performer in the face of structural headwinds.","url":"https://www.techmarketview.com/ukhotviews/archive/2026/06/17/deloitte-wins-132m-home-office-contract","sentiment":0.7},{"date":"2026-06-23","company":"Fujitsu","headline":"Post Office signs £492m contracts with Accenture and One View Commerce to replace Horizon, finally ejecting Fujitsu","summary":"The UK Post Office has awarded Accenture a £322.8m contract and One View Commerce a £169.2m contract to replace Fujitsu's controversial Horizon system, which led to over 900 wrongful convictions of subpostmasters. Fujitsu will continue supporting Horizon during a managed transition period, with a £41m extension to March 2027, but its formal exit marks the end of a 25-year relationship worth more than £2.5bn. The move closes one of the most damaging chapters in UK public sector IT history, with over £1 billion in compensation already paid to affected postmasters.","url":"https://www.datacenterdynamics.com/en/news/fujitsu-finally-set-to-exit-uk-post-office-it-contract/","sentiment":-0.55},{"date":"2026-06-23","company":"IBM","headline":"IBM and Wimbledon Introduce New AI-Powered Fan Experiences for The Championships 2026","summary":"IBM and The All England Lawn Tennis Club have unveiled enhanced AI-powered digital platforms ahead of Wimbledon 2026, building on their long-term technology partnership renewed in January. New features include real-time AI commentary and a modernised digital experience for fans worldwide. The initiative underscores IBM's continued investment in high-profile UK public-facing technology deployments.","url":"https://uk.newsroom.ibm.com/announcements?item=122908","sentiment":0.45},{"date":"2026-06-23","company":"IBM","headline":"IBM Study: AI Investment in UK & Ireland Set to Surge 67% by 2028","summary":"A new IBM Institute for Business Value study reveals AI investment in the UK and Ireland is forecast to surge 67% by 2028, yet only 13% of technology leaders feel fully prepared for the scale of AI agent deployment expected in the next 12 months. 75% of CIOs and CTOs report CEO-driven transformation mandates driving urgency. The findings position IBM as a thought leader as it competes for public-sector AI transformation contracts across UKI.","url":"https://uk.newsroom.ibm.com/2026-ibm-study-ai-investment-in-uki-is-set-to-surge","sentiment":0.35},{"date":"2026-06-23","company":"IBM","headline":"IBM Marks 70 Years in Ireland with €11.5M Tech Donation to SETU Waterford","summary":"IBM celebrated its 70th anniversary in Ireland by donating an €11.5 million technology system — including an IBM z17 mainframe — to South East Technological University (SETU) Waterford, with the Taoiseach in attendance. The system will support teaching, research, and skills development for over 60 student and research teams. The initiative strengthens IBM's relationships with Irish public-sector and education stakeholders.","url":"https://uk.newsroom.ibm.com/IBM-celebrates-70-years-in-ireland","sentiment":0.65},{"date":"2026-06-23","company":"IBM","headline":"IBM wins £320m UK MOD DEEAMS contract to modernise defence asset management","summary":"The Ministry of Defence has awarded IBM UK a £320 million contract to deliver the Defence Equipment Engineering Asset Management Systems (DEEAMS), replacing 17 fragmented legacy applications with a single AI-powered platform. The platform will serve 65,000 users across 130+ major military assets, enabling real-time predictive maintenance and logistics decisions. IBM's Managing Partner for UKI, Rahul Kalia, said the contract will deliver next-generation full-lifecycle asset management for UK Armed Forces, creating 100 new highly-skilled UK jobs.","url":"https://www.gov.uk/government/news/boost-to-jobs-and-military-capability-with-new-defence-equipment-system","sentiment":0.75},{"date":"2026-06-23","company":"PA Consulting","headline":"Jiten Kachhela Named President of PA Consulting as Firm Enters New Chapter Under Jacobs","summary":"Jacobs has appointed Jiten Kachhela — a 20-year PA veteran and former Global Head of Digital & Data — as President of PA Consulting, effective immediately. He succeeds CEO Christian Norris, who led the firm through Jacobs' full acquisition of PA, creating what Jacobs describes as a \"global advisory and delivery powerhouse.\" The leadership change signals strategic continuity with an emphasis on digital growth and expanded public-sector client relationships.","url":"https://www.paconsulting.com/newsroom/jiten-kachhela-announced-as-president-of-pa-consulting-10-june-2026","sentiment":0.3},{"date":"2026-06-23","company":"PA Consulting","headline":"PA Consulting Named in The Times Top 50 Employers for Gender Equality 2026","summary":"PA Consulting has been recognised in The Times Top 50 Employers for Gender Equality 2026, announced by Business in the Community. The recognition covers PA's UK operations and reflects its ongoing DE&I commitments. PA joins fellow consultancies PwC UK on the list, reinforcing the sector's profile as an employer of choice for diverse talent.","url":"https://www.bitc.org.uk/news/the-times-top-50-employers-for-gender-equality-2026-announced/","sentiment":0.4},{"date":"2026-06-23","company":"PA Consulting","headline":"PA Consulting appoints new President in strategic leadership transition","summary":"TechMarketView reports that PA Consulting has announced the appointment of a new President, marking a notable leadership transition at the UK-headquartered management consulting firm. The move is seen as part of PA's ongoing strategy to position itself for growth in government and public sector markets, where it holds a strong reputation for innovation and programme delivery. The firm also continued its involvement in public sector advisory work through techUK's 2026 Innovation Focus Week.","url":"https://www.techmarketview.com/ukhotviews/archive/2026/06/15/a-new-president-for-pa-consulting","sentiment":0.15},{"date":"2026-06-23","company":"PwC","headline":"PwC Warns Record UK Borrowing of £23.3bn in May Leaves Public Finances Exposed","summary":"PwC UK economist Nabil Taleb has warned that May 2026's public sector net borrowing of £23.3 billion — £5.6 billion above OBR forecasts — leaves the UK government with little fiscal headroom. Debt interest hit a May record of £11.7 billion, driven by the Bank of England holding rates at 3.75% amid persistent inflation risk. PwC's commentary reinforces its role as a key voice on public finances as the government faces pressure to fund public service reform.","url":"https://www.pwc.co.uk/press-room/press-releases/research-commentary/2026/pwc-comments-on-public-sector-finance-data---june-2026.html","sentiment":-0.15},{"date":"2026-06-23","company":"PwC","headline":"PwC UK Named a Times Top 50 Employer for Gender Equality for 16th Consecutive Year","summary":"PwC UK has been named in The Times Top 50 Employers for Gender Equality 2026 for the 16th year running, recognised by Business in the Community. The award reflects PwC's sustained commitment to gender parity across its UK workforce of over 22,000. PwC joins PA Consulting on this year's list among major consulting firms.","url":"https://www.pwc.co.uk/press-room/press-releases/corporate-news/pwc-uk-named-a-top-50-employer-for-gender-equality-.html","sentiment":0.4},{"date":"2026-06-23","company":"PwC","headline":"PwC leads MCA Awards 2026 shortlist with 33 nominations as UK government consulting spend hits record £3.7bn","summary":"PwC has the highest representation on the 2026 Management Consulting Association (MCA) Awards shortlist, with 33 projects and individuals recognised as finalists. The recognition comes as new Tussell data shows UK government spending on consulting reached a record £3.7 billion in 2024/25, an increase that has attracted political scrutiny. PwC's strong showing across transformation, digital, and health sectors underlines its continued dominance in the UK public sector advisory market.","url":"https://www.consultancy.uk/news/44186/government-consulting-spend-hits-37-billion","sentiment":0.35}];
+const companyColors = {"IBM":"#1d4ed8","Capgemini":"#7c3aed","Deloitte":"#059669","CGI":"#d97706","PA Consulting":"#0891b2","Capita":"#dc2626","PwC":"#be185d","Atos / Eviden":"#7c3aed","Atos/Eviden":"#7c3aed","Fujitsu":"#d97706","Multiple":"#6b7280"};
 
-function toggleChat() {
-  const w = document.getElementById('chatWindow');
-  w.classList.toggle('open');
+function sentimentDotColor(s) {
+  if (s >= 0.5) return '#22c55e';
+  if (s >= 0.1) return '#eab308';
+  if (s >= -0.1) return '#9ca3af';
+  if (s >= -0.5) return '#f97316';
+  return '#ef4444';
 }
 
-function askChat(q) {
-  document.getElementById('chatInput').value = q;
-  sendChat();
+function formatDate(d) {
+  return new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', {weekday:'short', day:'2-digit', month:'short', year:'numeric', timeZone:'UTC'});
 }
 
-function sendChat() {
-  const input = document.getElementById('chatInput');
-  const q = input.value.trim();
-  if (!q) return;
-  addMsg(q, 'user');
-  input.value = '';
-  document.getElementById('chatSuggestions').style.display = 'none';
-  setTimeout(() => addMsg(generateAnswer(q), 'bot'), 300);
+function renderCards(stories) {
+  const container = document.getElementById('cards-container');
+  if (!stories.length) { container.innerHTML = '<div class="no-results">No stories found for this filter.</div>'; return; }
+  container.innerHTML = stories.map(s => {
+    const color = companyColors[s.company] || '#6b7280';
+    const dotColor = sentimentDotColor(s.sentiment);
+    return `<div class="card">
+      <div class="card-meta">
+        <span class="company-tag" style="background:${color}">${s.company}</span>
+        <span class="date-tag">${formatDate(s.date)}</span>
+        <span class="sentiment-dot" style="background:${dotColor}" title="Sentiment: ${s.sentiment.toFixed(2)}"></span>
+      </div>
+      <h3><a href="${s.url}" target="_blank" rel="noopener">${s.headline}</a></h3>
+      <p>${s.summary}</p>
+    </div>`;
+  }).join('');
 }
 
-function addMsg(text, role) {
+let activeDate = 'all';
+let activeCompany = 'all';
+
+function getFiltered() {
+  return STORIES.filter(s =>
+    (activeDate === 'all' || s.date === activeDate) &&
+    (activeCompany === 'all' || s.company === activeCompany)
+  );
+}
+
+document.getElementById('archive-list').addEventListener('click', e => {
+  const li = e.target.closest('.archive-item');
+  if (!li) return;
+  document.querySelectorAll('.archive-item').forEach(el => el.classList.remove('active'));
+  li.classList.add('active');
+  activeDate = li.dataset.date;
+  renderCards(getFiltered());
+});
+
+document.getElementById('company-filters').addEventListener('click', e => {
+  const btn = e.target.closest('.chip');
+  if (!btn) return;
+  document.querySelectorAll('.chip').forEach(el => el.classList.remove('active'));
+  btn.classList.add('active');
+  activeCompany = btn.dataset.company;
+  if (activeCompany !== 'all') btn.style.background = btn.style.color; // was border color
+  renderCards(getFiltered());
+});
+
+// Fix chip active state colors
+document.querySelectorAll('.chip:not([data-company="all"])').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.chip').forEach(el => {
+      el.style.background = '';
+      el.style.color = el.dataset.company === 'all' ? '' : el.style.borderColor || '';
+    });
+    document.querySelector('.chip[data-company="all"]').style.background = '';
+    document.querySelector('.chip[data-company="all"]').style.color = '';
+    if (this.dataset.company !== 'all') {
+      this.style.background = this.style.borderColor;
+      this.style.color = 'white';
+    }
+  });
+});
+
+renderCards(STORIES);
+
+// Chat
+const chatBtn = document.getElementById('chat-btn');
+const chatWindow = document.getElementById('chat-window');
+const closeChat = document.getElementById('close-chat');
+const messagesEl = document.getElementById('messages');
+const chatInput = document.getElementById('chat-input');
+const sendBtn = document.getElementById('send-btn');
+const suggestionsEl = document.getElementById('suggestions');
+
+chatBtn.addEventListener('click', () => chatWindow.classList.add('open'));
+closeChat.addEventListener('click', () => chatWindow.classList.remove('open'));
+
+suggestionsEl.addEventListener('click', e => {
+  const chip = e.target.closest('.sugg-chip');
+  if (!chip) return;
+  chatInput.value = chip.textContent;
+  handleSend();
+});
+
+function addMsg(text, type) {
   const div = document.createElement('div');
-  div.className = 'chat-msg ' + role;
+  div.className = 'msg ' + type;
   div.textContent = text;
-  const msgs = document.getElementById('chatMessages');
-  msgs.appendChild(div);
-  msgs.scrollTop = msgs.scrollHeight;
+  messagesEl.appendChild(div);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
-function generateAnswer(q) {
+function answerQuestion(q) {
   const ql = q.toLowerCase();
   const companies = ['ibm','capgemini','deloitte','cgi','pa consulting','capita','pwc','atos','eviden','fujitsu'];
   
-  // Company specific
-  for (const comp of companies) {
-    if (ql.includes(comp)) {
-      const matches = STORIES.filter(s => s.company.toLowerCase().includes(comp));
-      if (matches.length === 0) return `No recent stories found for ${comp.toUpperCase()} in the last month.`;
-      const recent = matches.slice(0, 3);
-      return `Latest on ${matches[0].company} (${matches.length} stories total):\n\n` + 
-        recent.map(s => `• [${s.date}] ${s.headline}`).join('\n');
-    }
+  // Find matching company
+  let matchedCompany = null;
+  for (const c of companies) {
+    if (ql.includes(c)) { matchedCompany = c; break; }
   }
   
-  // Contract wins
-  if (ql.includes('win') || ql.includes('contract') || ql.includes('award')) {
-    const wins = STORIES.filter(s => s.sentiment > 0.4 && (s.headline.toLowerCase().includes('win') || s.headline.toLowerCase().includes('contract') || s.headline.toLowerCase().includes('award') || s.headline.toLowerCase().includes('secures')));
-    if (wins.length === 0) return 'No contract wins found recently.';
-    return `Contract wins (${wins.length} found):\n\n` + wins.slice(0,5).map(s => `• [${s.date}] ${s.company}: ${s.headline}`).join('\n');
+  let results = [];
+  
+  if (matchedCompany) {
+    results = STORIES.filter(s => s.company.toLowerCase().includes(matchedCompany) || matchedCompany.includes(s.company.toLowerCase()));
+    if (!results.length) return 'No stories found for ' + matchedCompany + '.';
+    const recent = results.slice(0, 3);
+    return 'Recent ' + recent[0].company + ' stories:\n\n' + recent.map(s => '📰 ' + s.date + ': ' + s.headline).join('\n\n');
   }
   
-  // Risks / negative
-  if (ql.includes('risk') || ql.includes('negative') || ql.includes('concern') || ql.includes('fail') || ql.includes('problem')) {
-    const risks = STORIES.filter(s => s.sentiment < -0.3);
-    return `Top risks/concerns (${risks.length} stories):\n\n` + risks.slice(0,5).map(s => `• [${s.date}] ${s.company}: ${s.headline}`).join('\n');
+  if (ql.includes('contract win') || ql.includes('win') || ql.includes('award')) {
+    results = STORIES.filter(s => s.sentiment > 0.4).sort((a,b) => b.sentiment - a.sentiment).slice(0, 4);
+    if (!results.length) return 'No contract wins found in recent data.';
+    return 'Recent contract wins & positive stories:\n\n' + results.map(s => '🟢 ' + s.company + ' (' + s.date + '): ' + s.headline).join('\n\n');
   }
   
-  // HMRC
-  if (ql.includes('hmrc')) {
-    const matches = STORIES.filter(s => s.headline.toLowerCase().includes('hmrc') || s.summary.toLowerCase().includes('hmrc'));
-    if (matches.length === 0) return 'No HMRC-related stories found.';
-    return `HMRC stories (${matches.length}):\n\n` + matches.slice(0,4).map(s => `• [${s.date}] ${s.company}: ${s.headline}`).join('\n');
+  if (ql.includes('risk') || ql.includes('negative') || ql.includes('problem') || ql.includes('fail')) {
+    results = STORIES.filter(s => s.sentiment < -0.3).sort((a,b) => a.sentiment - b.sentiment).slice(0, 4);
+    if (!results.length) return 'No major risk stories found.';
+    return 'Key risk stories:\n\n' + results.map(s => '🔴 ' + s.company + ' (' + s.date + '): ' + s.headline).join('\n\n');
   }
   
-  // NHS
-  if (ql.includes('nhs')) {
-    const matches = STORIES.filter(s => s.headline.toLowerCase().includes('nhs') || s.summary.toLowerCase().includes('nhs'));
-    if (matches.length === 0) return 'No NHS-related stories found in the current archive.';
-    return `NHS stories:\n\n` + matches.map(s => `• [${s.date}] ${s.company}: ${s.headline}`).join('\n');
+  if (ql.includes('latest') || ql.includes('today') || ql.includes('recent')) {
+    results = STORIES.slice(0, 5);
+    return 'Latest stories:\n\n' + results.map(s => '📰 ' + s.company + ' (' + s.date + '): ' + s.headline).join('\n\n');
   }
   
-  // Horizon
-  if (ql.includes('horizon')) {
-    const matches = STORIES.filter(s => s.headline.toLowerCase().includes('horizon') || s.summary.toLowerCase().includes('horizon'));
-    return `Horizon/Fujitsu stories (${matches.length}):\n\n` + matches.slice(0,4).map(s => `• [${s.date}] ${s.company}: ${s.headline}`).join('\n');
+  if (ql.includes('horizon') || ql.includes('post office')) {
+    results = STORIES.filter(s => (s.headline + s.summary).toLowerCase().includes('horizon') || (s.headline + s.summary).toLowerCase().includes('post office'));
+    if (!results.length) return 'No Horizon/Post Office stories found.';
+    return 'Post Office Horizon stories:\n\n' + results.slice(0, 3).map(s => '📰 ' + s.company + ' (' + s.date + '): ' + s.headline).join('\n\n');
   }
   
-  // Today / this week
-  if (ql.includes('today') || ql.includes('latest') || ql.includes('recent')) {
-    const sorted = [...STORIES].sort((a,b) => b.date.localeCompare(a.date));
-    const top = sorted.slice(0,5);
-    return `Most recent stories:\n\n` + top.map(s => `• [${s.date}] ${s.company}: ${s.headline}`).join('\n');
+  if (ql.includes('pension') || ql.includes('csps')) {
+    results = STORIES.filter(s => (s.headline + s.summary).toLowerCase().includes('pension'));
+    if (!results.length) return 'No pension stories found.';
+    return 'Civil Service Pension stories:\n\n' + results.slice(0, 4).map(s => '📰 ' + s.company + ' (' + s.date + '): ' + s.headline).join('\n\n');
   }
   
-  // Count
   if (ql.includes('how many') || ql.includes('count')) {
-    const counts = {};
+    const counts: Record<string, number> = {};
     STORIES.forEach(s => { counts[s.company] = (counts[s.company] || 0) + 1; });
-    return `Story counts by company:\n\n` + Object.entries(counts).sort((a,b) => b[1]-a[1]).map(([c,n]) => `• ${c}: ${n} stories`).join('\n');
+    return 'Story count by company:\n\n' + Object.entries(counts).sort(([,a],[,b]) => b-a).map(([c,n]) => c + ': ' + n + ' stories').join('\n');
   }
   
   // Keyword fallback
-  const words = ql.split(/\s+/).filter(w => w.length > 3);
-  const matches = STORIES.filter(s => words.some(w => s.headline.toLowerCase().includes(w) || s.summary.toLowerCase().includes(w)));
-  if (matches.length > 0) {
-    return `Found ${matches.length} stories matching your query:\n\n` + matches.slice(0,4).map(s => `• [${s.date}] ${s.company}: ${s.headline}`).join('\n');
+  results = STORIES.filter(s => {
+    const words = q.toLowerCase().split(' ').filter(w => w.length > 3);
+    return words.some(w => (s.headline + s.summary).toLowerCase().includes(w));
+  }).slice(0, 3);
+  
+  if (results.length) {
+    return 'Stories matching your query:\n\n' + results.map(s => '📰 ' + s.company + ' (' + s.date + '): ' + s.headline).join('\n\n');
   }
   
-  return "I couldn't find stories matching that query. Try asking about a specific company (Capita, Fujitsu, etc.), 'contract wins', 'risks', 'HMRC', or 'Horizon'.";
+  return 'I couldn\'t find a match for "' + q + '". Try asking about a company (e.g. "Latest on Capita?"), or topics like "contract wins", "pension", "Horizon", or "risks".';
 }
 
-// Filtering
-let currentDateFilter = 'all';
-let currentCompanyFilter = 'all';
-
-function filterDate(el) {
-  document.querySelectorAll('.archive-item').forEach(i => i.classList.remove('active'));
-  el.classList.add('active');
-  currentDateFilter = el.dataset.filterDate;
-  applyFilters();
+function handleSend() {
+  const q = chatInput.value.trim();
+  if (!q) return;
+  addMsg(q, 'user');
+  chatInput.value = '';
+  suggestionsEl.style.display = 'none';
+  setTimeout(() => {
+    const answer = answerQuestion(q);
+    addMsg(answer, 'bot');
+  }, 300);
 }
 
-function filterCompany(el) {
-  document.querySelectorAll('.chip').forEach(i => i.classList.remove('active'));
-  el.classList.add('active');
-  currentCompanyFilter = el.dataset.filterCompany;
-  applyFilters();
-}
-
-function applyFilters() {
-  const cards = document.querySelectorAll('.card');
-  let visible = 0;
-  cards.forEach(card => {
-    const matchDate = currentDateFilter === 'all' || card.dataset.date === currentDateFilter;
-    const matchComp = currentCompanyFilter === 'all' || card.dataset.company === currentCompanyFilter;
-    card.style.display = (matchDate && matchComp) ? '' : 'none';
-    if (matchDate && matchComp) visible++;
-  });
-  document.getElementById('no-results').style.display = visible === 0 ? 'block' : 'none';
-}
+sendBtn.addEventListener('click', handleSend);
+chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') handleSend(); });
 </script>
 </body>
 </html>
